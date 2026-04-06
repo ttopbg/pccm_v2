@@ -279,7 +279,7 @@ def _load_df_and_known(raw_bytes):
 st.markdown("""
 <div class="main-header">
   <h1>🙃 Tạo file Import PCCM 🙃</h1>
-  <p>File Input cần có sheet <b>Data</b></p>
+  <p>File Input cần có sheet <b>Data</b> (Nếu không có sẽ lấy sheet đầu tiên trong file!)</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -289,7 +289,7 @@ st.markdown("""
 # ════════════════════════════════════════════════════════════════════════════
 if st.session_state.phase == "upload":
 
-    st.markdown('<div class="step-box"><b>1️⃣</b> Tải lên file Excel chứa sheet <code>Data</code></div>',
+    st.markdown('<div class="step-box"><b>1️⃣</b> Tải lên file cần chuyển đổi PCCM</div>',
                 unsafe_allow_html=True)
     uploaded = st.file_uploader("Chọn file Excel", type=["xlsx","xls","xlsm"],
                                  label_visibility="collapsed")
@@ -307,7 +307,7 @@ if st.session_state.phase == "upload":
     st.markdown('<div class="step-box"><b>3️⃣</b> Chọn niên khóa</div>', unsafe_allow_html=True)
     nien_khoa = st.selectbox("Niên khóa", options=NIEN_KHOA_OPTIONS, label_visibility="collapsed")
 
-    st.markdown('<div class="step-box"><b>4️⃣</b> Nhấn nút để xử lý</div>', unsafe_allow_html=True)
+    st.markdown('<div class="step-box"><b>4️⃣</b> Nhấn <code><b>Chuyển đổi</b></code> để xử lý</div>', unsafe_allow_html=True)
     run_btn = st.button("▶  Chuyển đổi", type="primary", use_container_width=True,
                         disabled=(uploaded is None))
 
