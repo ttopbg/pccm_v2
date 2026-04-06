@@ -855,7 +855,7 @@ def process_data(input_src, nien_khoa: str, cap_hoc: str = "THPT",
 
     # ── Teachers sheet ────────────────────────────────────────────────
     wt=wb.create_sheet("Teachers")
-    ht=["STT","Họ tên","Ngày sinh","SĐT","Môn dạy","TBM","CN","PCCM","Emai","Tên đăng nhập"]
+    ht=["STT","Họ tên","Ngày sinh","SĐT","Môn dạy","TBM","CN","PCCM","Email","Tên đăng nhập"]
     for ci,h in enumerate(ht,1): wt.cell(row=1,column=ci,value=h)
     _sh(wt,1,len(ht)); wt.row_dimensions[1].height=30
     for i,t in enumerate(teachers):
