@@ -833,16 +833,16 @@ def process_data(input_src, nien_khoa: str, cap_hoc: str = "THPT",
     # ── Class sheet ───────────────────────────────────────────────────
     wc=wb.active; wc.title="Class"
     wc["A1"]="Niên khóa"; wc["B1"]=nien_khoa
-    wc["A2"]="Cấp học";   wc["B2"]={"TH":"Tiểu học","THCS":"THCS","THPT":"THPT"}.get(cap_hoc, cap_hoc)
-    wc["A3"]="Lớp";       wc["B3"]="Khối"
-    for r in (1,2,3):
+    # wc["A2"]="Cấp học";   wc["B2"]={"TH":"Tiểu học","THCS":"THCS","THPT":"THPT"}.get(cap_hoc, cap_hoc)
+    wc["A2"]="Lớp";       wc["B2"]="Khối"
+    for r in (1,2):
         for col in ("A","B"):
             c=wc[f"{col}{r}"]
             c.fill=PatternFill("solid",fgColor="1F4E79")
             c.font=Font(bold=True,color="FFFFFF",name="Arial",size=11)
             c.alignment=Alignment(horizontal="center",vertical="center")
     for i,cls in enumerate(all_cls):
-        r=i+4
+        r=i+3
         wc.cell(row=r,column=1,value=cls); wc.cell(row=r,column=2,value=get_grade(cls))
         for col in (1,2):
             c=wc.cell(row=r,column=col)
@@ -851,7 +851,7 @@ def process_data(input_src, nien_khoa: str, cap_hoc: str = "THPT",
             c.alignment=Alignment(horizontal="center",vertical="center")
     _ab(wc,1,len(all_cls)+3,2)
     wc.column_dimensions["A"].width=14; wc.column_dimensions["B"].width=14
-    wc.freeze_panes="A4"
+    wc.freeze_panes="A3"
 
     # ── Teachers sheet ────────────────────────────────────────────────
     wt=wb.create_sheet("Teachers")
