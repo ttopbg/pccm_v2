@@ -173,70 +173,70 @@ with st.sidebar:
 </div>
 """, unsafe_allow_html=True)
 
-    with st.expander("🔤  3. Nhận diện tên môn học", expanded=False):
-        st.markdown("""
-<div class="help-section">
-<h4>Bảng mã môn học</h4>
-<table>
-  <tr><th>Tên môn</th><th>Mã</th></tr>
-  <tr><td>Ngữ văn / Văn</td><td><code>NGUVAN</code></td></tr>
-  <tr><td>Toán / Toán học</td><td><code>TOAN</code></td></tr>
-  <tr><td>Tiếng Anh / Anh / NN1</td><td><code>ANH</code></td></tr>
-  <tr><td>Lịch sử / Sử</td><td><code>LICHSU</code></td></tr>
-  <tr><td>Địa lý / Địa</td><td><code>DIALY</code></td></tr>
-  <tr><td>Vật lý / Lý</td><td><code>VATLY</code></td></tr>
-  <tr><td>Hóa học / Hóa</td><td><code>HOAHOC</code></td></tr>
-  <tr><td>Sinh học / Sinh</td><td><code>SINH</code></td></tr>
-  <tr><td>Tin học / Tin</td><td><code>TINHOC</code></td></tr>
-  <tr><td>GDTC / Thể dục</td><td><code>GDTC</code></td></tr>
-  <tr><td>GDQP / Quốc phòng</td><td><code>GDQP</code></td></tr>
-  <tr><td>KTPL / GDKTPL</td><td><code>GDKTPL</code></td></tr>
-  <tr><td>GDĐP / GDDP</td><td><code>NDGDDP</code></td></tr>
-  <tr><td>HĐTN / TNHN</td><td><code>TNHN</code></td></tr>
-  <tr><td>Công nghệ</td><td><code>CONGNGHE</code></td></tr>
-  <tr><td>KHTN</td><td><code>KHTN</code></td></tr>
-  <tr><td>Lịch sử &amp; Địa lý</td><td><code>LICHSUDIALI</code></td></tr>
-</table>
-</div>
-""", unsafe_allow_html=True)
+#     with st.expander("🔤  3. Nhận diện tên môn học", expanded=False):
+#         st.markdown("""
+# <div class="help-section">
+# <h4>Bảng mã môn học</h4>
+# <table>
+#   <tr><th>Tên môn</th><th>Mã</th></tr>
+#   <tr><td>Ngữ văn / Văn</td><td><code>NGUVAN</code></td></tr>
+#   <tr><td>Toán / Toán học</td><td><code>TOAN</code></td></tr>
+#   <tr><td>Tiếng Anh / Anh / NN1</td><td><code>ANH</code></td></tr>
+#   <tr><td>Lịch sử / Sử</td><td><code>LICHSU</code></td></tr>
+#   <tr><td>Địa lý / Địa</td><td><code>DIALY</code></td></tr>
+#   <tr><td>Vật lý / Lý</td><td><code>VATLY</code></td></tr>
+#   <tr><td>Hóa học / Hóa</td><td><code>HOAHOC</code></td></tr>
+#   <tr><td>Sinh học / Sinh</td><td><code>SINH</code></td></tr>
+#   <tr><td>Tin học / Tin</td><td><code>TINHOC</code></td></tr>
+#   <tr><td>GDTC / Thể dục</td><td><code>GDTC</code></td></tr>
+#   <tr><td>GDQP / Quốc phòng</td><td><code>GDQP</code></td></tr>
+#   <tr><td>KTPL / GDKTPL</td><td><code>GDKTPL</code></td></tr>
+#   <tr><td>GDĐP / GDDP</td><td><code>NDGDDP</code></td></tr>
+#   <tr><td>HĐTN / TNHN</td><td><code>TNHN</code></td></tr>
+#   <tr><td>Công nghệ</td><td><code>CONGNGHE</code></td></tr>
+#   <tr><td>KHTN</td><td><code>KHTN</code></td></tr>
+#   <tr><td>Lịch sử &amp; Địa lý</td><td><code>LICHSUDIALI</code></td></tr>
+# </table>
+# </div>
+# """, unsafe_allow_html=True)
 
-    with st.expander("📊  4. Cấu trúc file đầu ra", expanded=False):
-        st.markdown("""
-<div class="help-section">
-<h4>File output gồm 3 sheet</h4>
-<p><span class="tag tag-blue">Sheet 1: Class</span> — danh sách lớp, sắp theo khối</p>
-<p><span class="tag tag-green">Sheet 2: Teachers</span></p>
-<table>
-  <tr><th>Cột</th><th>Nội dung</th></tr>
-  <tr><td>STT</td><td>Số thứ tự</td></tr>
-  <tr><td>Họ tên</td><td>Tên giáo viên</td></tr>
-  <tr><td>Ngày sinh</td><td>dd/mm/yyyy</td></tr>
-  <tr><td>SĐT</td><td>Để trống</td></tr>
-  <tr><td>Môn dạy</td><td>Mã môn, cách nhau dấu phẩy</td></tr>
-  <tr><td>TBM</td><td>Để trống</td></tr>
-  <tr><td>CN</td><td>Lớp chủ nhiệm (từ cột GVCN)</td></tr>
-  <tr><td>PCCM</td><td><code>10A1-TOAN,11B2-ANH</code></td></tr>
-</table>
-<p><span class="tag tag-orange">Sheet 3: Students</span> — tiêu đề cố định, dữ liệu trống</p>
-</div>
-""", unsafe_allow_html=True)
+#     with st.expander("📊  4. Cấu trúc file đầu ra", expanded=False):
+#         st.markdown("""
+# <div class="help-section">
+# <h4>File output gồm 3 sheet</h4>
+# <p><span class="tag tag-blue">Sheet 1: Class</span> — danh sách lớp, sắp theo khối</p>
+# <p><span class="tag tag-green">Sheet 2: Teachers</span></p>
+# <table>
+#   <tr><th>Cột</th><th>Nội dung</th></tr>
+#   <tr><td>STT</td><td>Số thứ tự</td></tr>
+#   <tr><td>Họ tên</td><td>Tên giáo viên</td></tr>
+#   <tr><td>Ngày sinh</td><td>dd/mm/yyyy</td></tr>
+#   <tr><td>SĐT</td><td>Để trống</td></tr>
+#   <tr><td>Môn dạy</td><td>Mã môn, cách nhau dấu phẩy</td></tr>
+#   <tr><td>TBM</td><td>Để trống</td></tr>
+#   <tr><td>CN</td><td>Lớp chủ nhiệm (từ cột GVCN)</td></tr>
+#   <tr><td>PCCM</td><td><code>10A1-TOAN,11B2-ANH</code></td></tr>
+# </table>
+# <p><span class="tag tag-orange">Sheet 3: Students</span> — tiêu đề cố định, dữ liệu trống</p>
+# </div>
+# """, unsafe_allow_html=True)
 
-    with st.expander("⚠️  5. Xử lý trùng lặp & lưu ý", expanded=False):
-        st.markdown("""
-<div class="help-section">
-<h4>Xử lý tổ hợp môn-lớp trùng</h4>
-<ul>
-  <li><b>Trùng trong cùng 1 GV:</b> bỏ tự động</li>
-  <li><b>Trùng giữa 2+ GV:</b> thêm tên GV để phân biệt</li>
-</ul>
-<div class="example-row">12A2-HOAHOC(Nguyễn Tuấn Anh)<br>12A2-HOAHOC(Đoàn Văn Chiến)</div>
-<h4>Không có cột GVCN</h4>
-<ul>
-  <li>Cột CN trong output để trống</li>
-  <li>Không có từ điển lớp → không hỏi ambiguous, dùng logic tách cũ</li>
-</ul>
-</div>
-""", unsafe_allow_html=True)
+#     with st.expander("⚠️  5. Xử lý trùng lặp & lưu ý", expanded=False):
+#         st.markdown("""
+# <div class="help-section">
+# <h4>Xử lý tổ hợp môn-lớp trùng</h4>
+# <ul>
+#   <li><b>Trùng trong cùng 1 GV:</b> bỏ tự động</li>
+#   <li><b>Trùng giữa 2+ GV:</b> thêm tên GV để phân biệt</li>
+# </ul>
+# <div class="example-row">12A2-HOAHOC(Nguyễn Tuấn Anh)<br>12A2-HOAHOC(Đoàn Văn Chiến)</div>
+# <h4>Không có cột GVCN</h4>
+# <ul>
+#   <li>Cột CN trong output để trống</li>
+#   <li>Không có từ điển lớp → không hỏi ambiguous, dùng logic tách cũ</li>
+# </ul>
+# </div>
+# """, unsafe_allow_html=True)
 
 
 # ── SESSION STATE ─────────────────────────────────────────────────────────────
