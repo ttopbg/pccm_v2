@@ -39,6 +39,17 @@ SUBJECT_MAP_TH = {
     "hđtn":"HDTN","trải nghiệm":"HDTN",
 }
 
+# Môn chính khóa GVCN Tiểu học theo khối
+# GVCN dạy toàn bộ các môn này cho lớp mình chủ nhiệm
+_TH_GVCN_SUBJECTS = {
+    1: ["TOAN","TIENGVIET","TUNHIENVAXAHOI","DAODUC","HDTN"],
+    2: ["TOAN","TIENGVIET","TUNHIENVAXAHOI","DAODUC","HDTN"],
+    3: ["TOAN","TIENGVIET","TUNHIENVAXAHOI","DAODUC","HDTN"],
+    4: ["TOAN","TIENGVIET","KHOAHOC","LICHSUDIALI","DAODUC","HDTN"],
+    5: ["TOAN","TIENGVIET","KHOAHOC","LICHSUDIALI","DAODUC","HDTN"],
+}
+
+
 # THCS (khối 6–9)
 SUBJECT_MAP_THCS = {
     "ngữ văn":"NGUVAN","ngữ văn học":"NGUVAN","van":"NGUVAN","nguvan":"NGUVAN","nv":"NGUVAN",
@@ -777,29 +788,52 @@ def process_data(input_src, nien_khoa: str, cap_hoc: str = "THPT",
                 cn_classes = expand_class_range(gvcn_raw, known_classes if known_classes else None)
                 gvcn_str = ", ".join(cn_classes) if cn_classes else gvcn_raw
 
+        # ── Xử lý PCCM ────────────────────────────────────────────────────────
+        # Tiểu học: GVCN tự động dạy các môn chính khóa của lớp chủ nhiệm.
+        # Các môn đó được thêm vào trước, sau đó bổ sung thêm từ cột PCCM
+        # (dùng cho GV bộ môn dạy thêm các lớp khác hoặc GV chuyên biệt).
+        extra_pccm_mllist: list = []   # từ cột PCCM (luôn xử lý)
+
+        if cap_hoc == "TH" and gvcn_str and cn_classes:
+            # Xác định môn chính khóa dựa trên khối của LỚP ĐẦU TIÊN trong CN
+            cn_grade = get_grade(cn_classes[0])
+            cn_subjects = _TH_GVCN_SUBJECTS.get(cn_grade, [])
+            if cn_subjects:
+                log(f"  → GVCN TH khối {cn_grade}: tự động thêm {cn_subjects}")
+            # Mỗi môn × mỗi lớp CN
+            for lop in cn_classes:
+                for code in cn_subjects:
+                    extra_pccm_mllist.append((lop.strip(), code))
+
+        # Xử lý PCCM bình thường (áp dụng cho mọi GV, mọi cấp)
         parsed = parse_pccm(praw, known_classes if known_classes else None,
                              resolved_ambiguities or {})
-        scodes,mllist = [],[]
-        for sr,ll in parsed:
-            # Kiểm tra resolved_subjects trước (user đã chọn thủ công)
+        for sr, ll in parsed:
             rs_key = sr.lower().strip() if sr else ""
             if resolved_subjects and rs_key in resolved_subjects:
                 code = resolved_subjects[rs_key]
             else:
                 code = get_subject_code(sr, cap_hoc)
             if code:
-                if code not in scodes: scodes.append(code)
                 for lop in ll:
-                    lop=lop.strip()
-                    if lop: mllist.append((lop,code))
+                    lop = lop.strip()
+                    if lop: extra_pccm_mllist.append((lop, code))
             else:
                 for lop in ll:
-                    lop=lop.strip()
-                    if lop: mllist.append((lop,sr.upper() if sr else "?"))
+                    lop = lop.strip()
+                    if lop: extra_pccm_mllist.append((lop, sr.upper() if sr else "?"))
 
-        seen=set(); uml=[]
-        for lop,code in mllist:
-            if (lop,code) not in seen: seen.add((lop,code)); uml.append((lop,code))
+        # Gộp, dedup, giữ thứ tự (CN subjects trước, PCCM sau)
+        seen = set(); uml = []
+        for lop, code in extra_pccm_mllist:
+            if (lop, code) not in seen:
+                seen.add((lop, code)); uml.append((lop, code))
+
+        # Tổng hợp mã môn
+        scodes = []
+        for _, code in uml:
+            if code and code != "?" and code not in scodes:
+                scodes.append(code)
 
         teachers.append({"stt":stt,"ho_ten":hoten,"ngay_dt":ndt,"ngay_str":nstr,
                          "subject_codes":scodes,"mon_lop_list":uml,"gvcn_str":gvcn_str})
