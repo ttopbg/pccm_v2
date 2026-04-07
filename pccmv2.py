@@ -532,7 +532,7 @@ elif st.session_state.phase == "processing":
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# PHASE 4 — DONEe
+# PHASE 4 — DONE
 # ════════════════════════════════════════════════════════════════════════════
 elif st.session_state.phase == "done":
     _cap_done  = st.session_state.get("cap_hoc", "THPT")
