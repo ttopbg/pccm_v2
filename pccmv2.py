@@ -7,7 +7,8 @@ import streamlit as st
 import pandas as pd
 from teacher_core import (process_data, detect_header_row, find_column,
                            detect_ambiguous_in_data, detect_unknown_subjects,
-                           _ALL_CODES, CAP_HOC_OPTIONS)
+                           _ALL_CODES, CAP_HOC_OPTIONS,
+                           build_known_classes_from_gvcn)
 
 NIEN_KHOA_OPTIONS = ["2025-2026", "2026-2027", "2027-2028"]
 
@@ -256,7 +257,6 @@ def _reset():
 
 
 def _load_df_and_known(raw_bytes):
-    import re
     xl  = pd.ExcelFile(io.BytesIO(raw_bytes))
     sn  = next((s for s in xl.sheet_names if s.strip().lower()=="data"), xl.sheet_names[0])
     rdf = pd.read_excel(io.BytesIO(raw_bytes), sheet_name=sn, header=None)
@@ -265,13 +265,7 @@ def _load_df_and_known(raw_bytes):
     df.columns = [str(c).strip() for c in df.columns]
     col_gvcn = find_column(df, ["gvcn","chủ nhiệm","chu nhiem","chủ nhiệm lớp",
                                  "chu nhiem lop","lớp chủ nhiệm","lop chu nhiem","cn"])
-    known = set()
-    if col_gvcn:
-        pat = re.compile(r'(?:0?[1-9]|1[0-2])[A-Za-zÀ-ỹ]+\d*', re.UNICODE)
-        for val in df[col_gvcn]:
-            if pd.notna(val) and str(val).strip():
-                for c in pat.findall(str(val)):
-                    known.add(c.strip())
+    known = build_known_classes_from_gvcn(df, col_gvcn)
     return df, col_gvcn, known
 
 
