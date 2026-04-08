@@ -271,6 +271,36 @@ def expand_class_range(text, known_classes=None, resolved_ambiguities=None):
 
     # Bỏ sĩ số trong ngoặc: 10A1(52) → 10A1
     text = re.sub(r'((?:0?[1-9]|1[0-2])[A-Za-zÀ-ỹ]+\d*)\(\d+\)', r'\1', text, flags=re.UNICODE)
+
+    # ── Tiền xử lý: tách dạng <grade><multi_alpha> nhờ known_classes ──────────
+    # Ví dụ: '7ABCD' → '7A,7B,7C,7D'  khi known = {7A,7B,7C,7D}
+    # Điều kiện: token có ≥2 chữ cái, KHÔNG có chữ số, và KHÔNG nằm trong known_classes,
+    # nhưng mỗi chữ cái tách ra đều có trong known_classes dưới dạng <grade><ch>.
+    if known_classes:
+        def _expand_multi_alpha(m):
+            grade = m.group(1)
+            alpha = m.group(2)
+            grade_norm = str(int(grade))  # bỏ leading zero
+            # Nếu đã là lớp hợp lệ trong known → giữ nguyên
+            if f"{grade_norm}{alpha}" in known_classes or f"{grade}{alpha}" in known_classes:
+                return m.group(0)
+            # Thử tách từng chữ cái (ưu tiên grade không có leading zero)
+            candidates = [f"{grade_norm}{ch}" for ch in alpha]
+            if all(c in known_classes for c in candidates):
+                return ",".join(candidates)
+            # Thử với grade gốc (có thể có leading zero)
+            candidates_raw = [f"{grade}{ch}" for ch in alpha]
+            if all(c in known_classes for c in candidates_raw):
+                return ",".join(candidates_raw)
+            return m.group(0)
+
+        text = re.sub(
+            r'(?<!\w)(0?[1-9]|1[0-2])([A-Za-zÀ-ỹ]{2,})(?!\d)',
+            _expand_multi_alpha,
+            text,
+            flags=re.UNICODE
+        )
+
     classes = []
 
     # ── Xử lý range: 1A1-1A5, 9B1 đến 9B3, 10A1-10A5 ──────────────────────
@@ -692,6 +722,57 @@ def detect_header_row(sdf):
         if sum(1 for v in vals for k in kws if k in v)>=2: return i
     return 0
 
+def extract_classes_from_gvcn(val_str: str) -> set:
+    """
+    Trích xuất tên lớp từ một ô GVCN, xử lý cả dạng rút gọn.
+    Ví dụ:
+      '7ABCD'        → {'7A', '7B', '7C', '7D'}
+      '10A1, 10A2'   → {'10A1', '10A2'}
+      '11A12'        → {'11A12'}  (số cuối → lớp đầy đủ, không tách chữ)
+      '7AB, 8CD'     → {'7A', '7B', '8C', '8D'}
+    Logic:
+      - Dạng <grade><letters><digits>  → 1 lớp đầy đủ (ví dụ: 10A1, 11A12)
+      - Dạng <grade><letters>          → tách từng chữ cái thành 1 lớp riêng
+        nếu <letters> dài ≥ 2 và KHÔNG có chữ số đi kèm.
+    """
+    result = set()
+    # Pattern tổng quát: tìm tất cả token dạng <grade><alpha+>[<digits>]
+    _gvcn_pat = re.compile(
+        r'(?<!\d)(0?[1-9]|1[0-2])([A-Za-zÀ-ỹ]+)(\d*)',
+        re.UNICODE
+    )
+    for m in _gvcn_pat.finditer(val_str):
+        grade, alpha, digits = m.group(1), m.group(2), m.group(3)
+        # Chuẩn hoá grade: bỏ leading zero (01 → 1)
+        grade_norm = str(int(grade))
+        if digits:
+            # Có chữ số → lớp đầy đủ như 10A1, 11A12
+            result.add(f"{grade_norm}{alpha}{digits}")
+        elif len(alpha) == 1:
+            # 1 chữ cái duy nhất, không số → lớp như 7A, 12D
+            result.add(f"{grade_norm}{alpha}")
+        else:
+            # Nhiều chữ cái, không số → dạng rút gọn như 7ABCD → 7A,7B,7C,7D
+            for ch in alpha:
+                result.add(f"{grade_norm}{ch}")
+    return result
+
+
+def build_known_classes_from_gvcn(df, col_gvcn) -> set:
+    """
+    Duyệt toàn bộ cột GVCN, trả về tập hợp tên lớp hợp lệ.
+    Xử lý cả dạng rút gọn (7ABCD → 7A,7B,7C,7D) và dạng đầy đủ (10A1).
+    Bỏ qua các ô trống — khi đó không có thông tin lớp nào được thêm vào.
+    """
+    known: set = set()
+    if not col_gvcn:
+        return known
+    for val in df[col_gvcn]:
+        if pd.notna(val) and str(val).strip():
+            known.update(extract_classes_from_gvcn(str(val).strip()))
+    return known
+
+
 def get_grade(cls):
     """Trả về số khối (int) từ tên lớp. Hỗ trợ khối 1-12 và dạng 01A, 09B."""
     m = re.match(r'^(0?[1-9]|1[0-2])(?=[A-Za-zÀ-ỹ])', str(cls).strip(), re.UNICODE)
@@ -756,17 +837,17 @@ def process_data(input_src, nien_khoa: str, cap_hoc: str = "THPT",
     df = df.reset_index(drop=True)
 
     # ── Bước 1: Thu thập known_classes từ toàn bộ cột GVCN ───────────────────
-    # Đọc raw bằng regex cơ bản — KHÔNG qua expand_class_range để tránh tách sai
-    # Mỗi ô GVCN thường chứa tên lớp rõ ràng: "10A1", "10A12", "10A1, 10A2"
+    # Dùng build_known_classes_from_gvcn để xử lý cả dạng rút gọn (7ABCD → 7A,7B,7C,7D)
+    # và dạng đầy đủ (10A1, 11A12). Khi cột GVCN trống/không tồn tại → known_classes rỗng,
+    # xử lý PCCM theo logic cũ (không có từ điển lớp).
     known_classes: set = set()
     if col_gvcn:
         log("Đọc danh sách lớp từ cột GVCN...")
-        _raw_cls_pat = re.compile(r'(?:0?[1-9]|1[0-2])[A-Za-zÀ-ỹ]+\d*', re.UNICODE)
-        for val in df[col_gvcn]:
-            if pd.notna(val) and str(val).strip():
-                for c in _raw_cls_pat.findall(str(val)):
-                    known_classes.add(c.strip())
-        log(f"  → Nhận diện được {len(known_classes)} lớp: {', '.join(sorted(known_classes))}")
+        known_classes = build_known_classes_from_gvcn(df, col_gvcn)
+        if known_classes:
+            log(f"  → Nhận diện được {len(known_classes)} lớp: {', '.join(sorted(known_classes))}")
+        else:
+            log("  → Cột GVCN không có dữ liệu lớp, xử lý PCCM theo logic mặc định.")
 
     total = len(df)
     teachers = []
