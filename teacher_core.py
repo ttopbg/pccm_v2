@@ -1,4 +1,4 @@
-# teacher_core.py  –  logic dùng chung, KHÔNG cần Anthropic API
+# teacher_core. py  –  logic dùng chung, KHÔNG cần Anthropic API
 import re, io, unicodedata, difflib
 from datetime import datetime, timedelta, date as date_type
 from collections import defaultdict
