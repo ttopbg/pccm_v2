@@ -1,1 +1,1 @@
-nháp
+đang dùng-full cấp
