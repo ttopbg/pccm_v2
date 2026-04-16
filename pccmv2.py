@@ -116,7 +116,7 @@ st.markdown("""
     content: "";
     position: fixed;
     inset: 0;
-    background: rgba(10, 25, 47, 0.15);
+    background: rgba(10, 25, 47, 0.95);
     z-index: -1;
     pointer-events: none;
 }
