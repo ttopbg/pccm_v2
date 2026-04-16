@@ -355,7 +355,7 @@ def _load_df_and_known(raw_bytes):
 # ── HEADER ────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="main-header">
-  <h1>🙃 Tạo file Import PCCM 🙃</h1>
+  <h1>🍹 Tạo file Import PCCM</h1>
   <p>File Input cần có sheet <b>Data</b> (hoặc sẽ lấy sheet đầu tiên của file)</p>
 </div>
 """, unsafe_allow_html=True)
