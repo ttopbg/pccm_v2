@@ -116,13 +116,13 @@ st.markdown("""
     content: "";
     position: fixed;
     inset: 0;
-    background: rgba(10, 25, 47, 0.55);
+    background: rgba(10, 25, 47, 0.15);
     z-index: -1;
     pointer-events: none;
 }
 /* Sidebar: background mờ tối để chữ hướng dẫn rõ */
 [data-testid="stSidebar"] {
-    background: rgba(15, 30, 55, 0.12) !important;
+    background: rgba(15, 30, 55, 0.62) !important;
     backdrop-filter: blur(8px);
     border-right: 1px solid rgba(91,163,217,0.25);
 }
