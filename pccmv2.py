@@ -312,7 +312,7 @@ def _reset():
 
 def _load_df_and_known(raw_bytes):
     import re
-    from teacher_core import expand_class_range
+    from teacher_core import expand_class_range, _preprocess_alpha_suffixes
     xl  = pd.ExcelFile(io.BytesIO(raw_bytes))
     sn  = next((s for s in xl.sheet_names if s.strip().lower()=="data"), xl.sheet_names[0])
     rdf = pd.read_excel(io.BytesIO(raw_bytes), sheet_name=sn, header=None)
@@ -335,10 +335,20 @@ def _load_df_and_known(raw_bytes):
             re.UNICODE
         )
         known_pass1 = set()
+        # Pattern bắt compact alpha liền (7ABCD) để tách thành atoms
+        _compact_alpha_scan = re.compile(
+            r'(?<![A-Za-z\d])(0?[1-9]|1[0-2])([A-Za-zÀ-ỹ]{2,})(?!\d)', re.UNICODE)
         for val in df[col_gvcn]:
             if pd.notna(val) and str(val).strip():
-                for c in _atomic_pat.findall(str(val)):
+                # Tiền xử lý 7A,B,C,D → 7A,7B,7C,7D trước khi bắt lớp nguyên tử
+                val_pre = _preprocess_alpha_suffixes(str(val).strip())
+                for c in _atomic_pat.findall(val_pre):
                     known_pass1.add(c.strip())
+                # Bắt thêm compact alpha liền (7ABCD → 7A,7B,7C,7D)
+                for m in _compact_alpha_scan.finditer(str(val).strip()):
+                    grade, alphas = m.group(1), m.group(2)
+                    for ch in alphas:
+                        known_pass1.add(f"{grade}{ch}")
         # Pass 2: expand compact alpha "7ABCD" → [7A,7B,7C,7D] dùng known_pass1
         for val in df[col_gvcn]:
             if pd.notna(val) and str(val).strip():
