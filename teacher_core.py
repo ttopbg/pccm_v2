@@ -87,6 +87,7 @@ SUBJECT_MAP_THCS = {
     "vật lí":"KHTN(VATLY)","vat li":"KHTN(VATLY)","lý":"KHTN(VATLY)","lí":"KHTN(VATLY)",
     "ly":"KHTN(VATLY)","li":"KHTN(VATLY)","vatly":"KHTN(VATLY)","vl":"KHTN(VATLY)",
     "khoa học tự nhiên (hóa)":"KHTN(HOAHOC)","hóa học":"KHTN(HOAHOC)","hoa hoc":"KHTN(HOAHOC)",
+    "khoa học tự nhiên(hóa)":"KHTN(HOAHOC)","khtn(hóa)":"KHTN(HOAHOC)","khtn(hoá)":"KHTN(HOAHOC)",
     "hóa":"KHTN(HOAHOC)","hoá":"KHTN(HOAHOC)","hoa":"KHTN(HOAHOC)","hoahoc":"KHTN(HOAHOC)",
     "hh":"KHTN(HOAHOC)","hoá học":"KHTN(HOAHOC)",
     "khoa học tự nhiên (sinh)":"KHTN(SINH)","sinh học":"KHTN(SINH)","sinh hoc":"KHTN(SINH)",
