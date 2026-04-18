@@ -97,13 +97,14 @@ SUBJECT_MAP_THCS = {
     "sinh":"KHTN(SINH)",
     "khoa học tự nhiên":"KHTN","khoa hoc tu nhien":"KHTN","khtn":"KHTN",
     # Lịch sử & Địa lí — phân môn
+    "lich su va dia ly":"LICHSUDIALI","ls&đl":"LICHSUDIALI","ls & đl":"LICHSUDIALI","lsdl":"LICHSUDIALI",
+    "lịch sử và địa lí":"LICHSUDIALI","lịch sử và địa lý":"LICHSUDIALI",
     "lịch sử và địa lí (địa)":"LICHSUDIALI(DIA)","lịch sử và địa lý (địa)":"LICHSUDIALI(DIA)",
     "địa lí":"LICHSUDIALI(DIA)","địa lý":"LICHSUDIALI(DIA)","ls&đl(địa)":"LICHSUDIALI(DIA)","ls & đl(địa)":"LICHSUDIALI(DIA)",
     "dia li":"LICHSUDIALI(DIA)","dia ly":"LICHSUDIALI(DIA)","địa":"LICHSUDIALI(DIA)","dia":"LICHSUDIALI(DIA)",
+    "ls & đl(sử)":"LICHSUDIALI(SU)","ls&đl(sử)":"LICHSUDIALI(SU)",
     "lịch sử và địa lí (sử)":"LICHSUDIALI(SU)","lịch sử và địa lý (sử)":"LICHSUDIALI(SU)",
     "lịch sử":"LICHSUDIALI(SU)","lich su":"LICHSUDIALI(SU)","sử":"LICHSUDIALI(SU)","su":"LICHSUDIALI(SU)",
-    "lịch sử và địa lí":"LICHSUDIALI","lịch sử và địa lý":"LICHSUDIALI","ls & đl(sử)":"LICHSUDIALI(SU)","ls&đl(sử)":"LICHSUDIALI(SU)",
-    "lich su va dia ly":"LICHSUDIALI","ls&đl":"LICHSUDIALI","ls & đl":"LICHSUDIALI","lsdl":"LICHSUDIALI",
 }
 
 # THPT (khối 10–12) — giữ nguyên bảng cũ
