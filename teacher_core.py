@@ -320,26 +320,32 @@ def expand_class_range(text, known_classes=None, resolved_ambiguities=None):
 
     # Bỏ sĩ số trong ngoặc: 10A1(52) → 10A1
     text = re.sub(r'((?:0?[1-9]|1[0-2])[A-Za-zÀ-ỹ]+\d*)\(\d+\)', r'\1', text, flags=re.UNICODE)
+    # Xử lý dạng 7A,B,C,D → 7A,7B,7C,7D
+    text = _preprocess_alpha_suffixes(text)
     classes = []
 
-    # ── Xử lý compact chữ cái: 7ABCD → [7A,7B,7C,7D] (khi có known_classes) ─
+    # ── Xử lý compact chữ cái: 7ABCD → [7A,7B,7C,7D] ─────────────────────────
     # Pattern: khối + 2+ chữ cái + KHÔNG có số → dạng compact alpha
     _alpha_compact_pat = re.compile(
         r'(?<![A-Za-z\d])(0?[1-9]|1[0-2])([A-Za-zÀ-ỹ]{2,})(?!\d)', re.UNICODE)
     def _expand_alpha(m):
         grade, alphas = m.group(1), m.group(2)
         token = f"{grade}{alphas}"
-        # Nếu token đã là 1 lớp hợp lệ trong known → giữ nguyên, không tách
+        # Token đã là 1 lớp hợp lệ trong known → giữ nguyên (ví dụ: trường có lớp 7AB)
         if known_classes and token in known_classes:
             classes.append(token)
             return ''
+        # Có known → thử greedy tách theo known
         if known_classes:
             split_result = _split_alpha_compact(grade, alphas, known_classes)
             if split_result:
                 classes.extend(split_result)
                 return ''
-        # Không tách được → để lại cho regex bình thường bên dưới xử lý
-        return m.group()
+        # Fallback (không có known HOẶC không tách được qua known):
+        # tách mỗi chữ cái thành 1 lớp — đây là cách tự nhiên nhất
+        # Ví dụ: 9ABCD (known chỉ có 9A) → [9A,9B,9C,9D]
+        classes.extend(f"{grade}{ch}" for ch in alphas)
+        return ''
     text = _alpha_compact_pat.sub(_expand_alpha, text)
 
     # ── Xử lý range: 1A1-1A5, 9B1 đến 9B3, 10A1-10A5 ──────────────────────
@@ -588,14 +594,47 @@ def detect_unknown_subjects(df, col_pccm, cap_hoc: str = "AUTO"):
 
     return list(found.values())
 
+def _preprocess_alpha_suffixes(text):
+    """
+    Tiền xử lý: thêm grade prefix cho chữ cái đơn đứng sau lớp có dấu phẩy.
+    Xử lý dạng '7A,B,C,D' hoặc '7A, B, C, D' → '7A,7B,7C,7D'.
+    Không ảnh hưởng đến: '7ABCD' (compact liền), '7A1,2,3' (suffix số), '7A,7B' (đã đủ).
+
+    Ví dụ:
+      '7A,B,C,D'         → '7A,7B,7C,7D'
+      '10A,B,C'          → '10A,10B,10C'
+      '12A,B'            → '12A,12B'
+      'Văn: 8A,B + Lý: 9A,B,C' → 'Văn: 8A,8B + Lý: 9A,9B,9C'
+      '7A1,2,3'          → '7A1,2,3'   (số suffix, không đổi)
+      '7ABCD'            → '7ABCD'     (compact liền, không đổi)
+    """
+    _PAT = re.compile(
+        r'((?:0?[1-9]|1[0-2])[A-Za-zÀ-ỹ]+\d*)'          # lớp đầu: 7A, 10A, 7A1
+        r'((?:\s*,\s*[A-Za-zÀ-ỹ](?![A-Za-zÀ-ỹ0-9]))+)',  # ,B ,C ,D (chữ đơn không grade)
+        re.UNICODE
+    )
+    def _expand(m):
+        base_cls = m.group(1)
+        tail     = m.group(2)
+        gm = re.match(r'^(0?[1-9]|1[0-2])(?=[A-Za-zÀ-ỹ])', base_cls, re.UNICODE)
+        if not gm: return m.group()
+        grade    = gm.group(1)
+        suffixes = re.findall(r'[A-Za-zÀ-ỹ](?![A-Za-zÀ-ỹ0-9])', tail)
+        return base_cls + ',' + ','.join(f'{grade}{s}' for s in suffixes)
+    return _PAT.sub(_expand, text)
+
+
 def _expand_suffix_groups_in_text(text):
     """
     Tiền xử lý: mở rộng suffix groups ngay trong chuỗi text TRƯỚC KHI tokenize.
     '11A4,5,11,12A6,7' → '11A4,11A5,11A11,12A6,12A7'
     '10A1,2,3'         → '10A1,10A2,10A3'
     '11A3, 12D'        → '11A3, 12D'  (12D = lớp riêng, không phải suffix)
+    '7A,B,C,D'         → '7A,7B,7C,7D'  (qua _preprocess_alpha_suffixes)
     Phân biệt lớp không có số (12D, 11D) với số suffix (4, 5, 11).
     """
+    # Bước 0: xử lý dạng 7A,B,C,D → 7A,7B,7C,7D trước khi tokenize
+    text = _preprocess_alpha_suffixes(text)
     _GP = r'(?:0?[1-9]|1[0-2])'
     # Tokenizer phân biệt 3 loại: lớp có số cuối, lớp không có số, số thuần
     _TOK = re.compile(
@@ -859,16 +898,27 @@ def process_data(input_src, nien_khoa: str, cap_hoc: str = "AUTO",
             re.UNICODE
         )
         known_pass1: set = set()
+        # Pattern bắt compact alpha liền (7ABCD) để tách thành atoms
+        _compact_alpha_scan = re.compile(
+            r'(?<![A-Za-z\d])(0?[1-9]|1[0-2])([A-Za-zÀ-ỹ]{2,})(?!\d)', re.UNICODE)
         for val in df[col_gvcn]:
             if pd.notna(val) and str(val).strip():
-                for c in _atomic_pat.findall(str(val)):
+                # Tiền xử lý 7A,B,C,D → 7A,7B,7C,7D trước khi bắt lớp nguyên tử
+                val_pre = _preprocess_alpha_suffixes(str(val).strip())
+                for c in _atomic_pat.findall(val_pre):
                     known_pass1.add(c.strip())
+                # Bắt thêm compact alpha liền (7ABCD → 7A,7B,7C,7D)
+                for m in _compact_alpha_scan.finditer(str(val).strip()):
+                    grade, alphas = m.group(1), m.group(2)
+                    for ch in alphas:
+                        known_pass1.add(f"{grade}{ch}")
         log(f"  → Lượt 1: {len(known_pass1)} lớp nguyên tử: {', '.join(sorted(known_pass1))}")
 
         # Lượt 2: expand_class_range với known_pass1 để tách compact alpha "7ABCD" → 7A,7B,7C,7D
         log("Đọc danh sách lớp từ cột GVCN (lượt 2 – tách compact chữ cái)...")
         for val in df[col_gvcn]:
             if pd.notna(val) and str(val).strip():
+                # _preprocess_alpha_suffixes đã được gọi bên trong expand_class_range
                 expanded = expand_class_range(str(val).strip(), known_pass1 if known_pass1 else None)
                 for c in expanded:
                     known_classes.add(c.strip())
