@@ -1,1 +1,1 @@
-đang dùng-full cấp
+all - đóng
