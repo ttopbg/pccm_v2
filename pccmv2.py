@@ -18,134 +18,118 @@ st.markdown("""
 <style>
 /* ═══════════════════════════════════════════════════════════════════
    PCCM – Design System
-   Phong cách: Modern-Clean x Retro/Vintage Pastel
-   Hỗ trợ đầy đủ Light Mode & Dark Mode
+   Phong cách: Modern-Clean x Retro/Vintage
+   Cấu trúc: Strict Grid & Card-based
 ═══════════════════════════════════════════════════════════════════ */
 
-/* ── Google Font (Roboto Mono cho accent retro) ───────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
-/* ── Biến màu – Light Mode ────────────────────────────────────────── */
 :root {
-  /* Pastel nền & surface */
-  --bg-page:          #F2F0EB;          /* kem ấm */
-  --bg-card:          #FAFAF7;          /* trắng ngà */
-  --bg-card-hover:    #F5F3EE;
-  --bg-sidebar:       #EDE9E0;          /* be nhạt */
+  /* ================= LIGHT MODE ================= */
+  /* Nền Pastel hoài cổ - Sạch sẽ, dịu mắt */
+  --bg-page:          #F7F5F0;          /* Kem ấm hoài cổ */
+  --bg-card:          #FFFFFF;          /* Trắng tinh để tách biệt Card */
+  --bg-card-hover:    #F0EBE1;
+  --bg-sidebar:       #EFECE4;          /* Xám be nhạt */
 
-  /* Chữ – tương phản cao */
-  --text-primary:     #1C1A16;          /* nâu than */
-  --text-secondary:   #4A4540;          /* nâu trung */
-  --text-muted:       #7A736A;          /* xám ấm */
+  /* Text - Tương phản cực cao để dễ đọc */
+  --text-primary:     #1A1A1A;          /* Đen tuyền */
+  --text-secondary:   #4A4742;          /* Xám than */
+  --text-muted:       #757169;
   --text-on-accent:   #FFFFFF;
 
-  /* Accent – Indigo đậm (CTA chính) */
-  --accent-cta:       #3D2E8C;          /* indigo đậm */
-  --accent-cta-hover: #2E2270;
-  --accent-cta-light: rgba(61,46,140,0.10);
-  --accent-cta-glow:  rgba(61,46,140,0.28);
+  /* CTA (Call To Action) - Đỏ gạch/Cam đất Retro nổi bật */
+  --accent-cta:       #D95A4E;          
+  --accent-cta-hover: #C24A3E;
+  --accent-cta-glow:  rgba(217, 90, 78, 0.25);
+  
+  /* Điểm nhấn phụ - Xanh Navy Retro */
+  --accent-secondary: #2C435F;
 
-  /* Border & divider */
-  --border:           #D6D0C4;
-  --border-strong:    #B0A898;
+  /* Card Borders - Viền rõ nét, nghiêm ngặt */
+  --border:           #D6D2C4;
+  --border-strong:    #A8A393;
 
   /* Trạng thái */
-  --step-bg:          rgba(61,46,140,0.07);
-  --step-border:      #3D2E8C;
-  --step-text:        #2E2270;
+  --step-bg:          #FFFFFF;
+  --step-border:      #2C435F;
+  --step-text:        #2C435F;
 
-  --success-bg:       rgba(42,130,84,0.09);
-  --success-border:   #2A8254;
-  --success-text:     #1A5C3A;
+  --success-bg:       #F0FDF4;
+  --success-border:   #16A34A;
+  --success-text:     #14532D;
 
-  --warn-bg:          rgba(185,105,0,0.09);
-  --warn-border:      #B96900;
-  --warn-text:        #7A4500;
+  --warn-bg:          #FFFBEB;
+  --warn-border:      #D97706;
+  --warn-text:        #78350F;
 
-  /* Card ambig */
-  --card-bg:          #FAFAF7;
-  --card-border:      #D6D0C4;
-
-  /* Help / sidebar section */
-  --help-bg:          rgba(61,46,140,0.05);
-  --help-border:      rgba(61,46,140,0.20);
-
-  /* Code inline */
-  --code-bg:          rgba(61,46,140,0.08);
-  --code-text:        #3D2E8C;
+  /* Help & Code */
+  --help-bg:          #FFFFFF;
+  --code-bg:          #F1F5F9;
+  --code-text:        #0F172A;
 
   /* Tags */
-  --tag-green-bg:     rgba(42,130,84,0.12);
-  --tag-green-fg:     #1A5C3A;
-  --tag-blue-bg:      rgba(61,46,140,0.12);
-  --tag-blue-fg:      #2E2270;
-  --tag-orange-bg:    rgba(185,105,0,0.12);
-  --tag-orange-fg:    #7A4500;
+  --tag-green-bg:     #DCFCE7;
+  --tag-green-fg:     #166534;
+  --tag-blue-bg:      #DBEAFE;
+  --tag-blue-fg:      #1E40AF;
+  --tag-orange-bg:    #FEF3C7;
+  --tag-orange-fg:    #92400E;
 
-  /* Table */
-  --table-head-bg:    #EDE9E0;
-  --table-border:     #D6D0C4;
-  --table-row-alt:    rgba(61,46,140,0.03);
-
-  /* Shadow */
-  --shadow-card:      0 2px 10px rgba(28,26,22,0.08), 0 0 0 1px var(--border);
-  --shadow-card-hover:0 4px 20px rgba(28,26,22,0.12), 0 0 0 1px var(--border-strong);
+  /* Thẩm mỹ Đổ bóng - Gọn gàng, phân lớp rõ */
+  --shadow-card:      0 2px 4px rgba(0,0,0,0.04), 0 0 0 1px var(--border);
+  --shadow-card-hover:0 4px 12px rgba(0,0,0,0.08), 0 0 0 1px var(--border-strong);
 }
 
-/* ── Biến màu – Dark Mode ─────────────────────────────────────────── */
 [data-theme="dark"] {
-  --bg-page:          #141210;
-  --bg-card:          #1E1C18;
-  --bg-card-hover:    #242218;
-  --bg-sidebar:       #191713;
+  /* ================= DARK MODE ================= */
+  /* Nền tối có chiều sâu - Không dùng đen thui, dùng Xám than */
+  --bg-page:          #1C1B19;          
+  --bg-card:          #262522;          
+  --bg-card-hover:    #302E2A;
+  --bg-sidebar:       #21201D;          
 
-  --text-primary:     #EDE9E0;
-  --text-secondary:   #B8B0A4;
-  --text-muted:       #7A736A;
+  /* Text - Độ tương phản hoàn hảo trên nền tối */
+  --text-primary:     #F2EFE9;          
+  --text-secondary:   #BAB5AB;          
+  --text-muted:       #858178;
   --text-on-accent:   #FFFFFF;
 
-  --accent-cta:       #7B6ECC;
-  --accent-cta-hover: #9486D8;
-  --accent-cta-light: rgba(123,110,204,0.15);
-  --accent-cta-glow:  rgba(123,110,204,0.35);
+  /* CTA - Cam sáng bật tone trên nền tối */
+  --accent-cta:       #E66E63;          
+  --accent-cta-hover: #F28077;
+  --accent-cta-glow:  rgba(230, 110, 99, 0.3);
+  
+  --accent-secondary: #5E81AC;
 
-  --border:           #2E2B24;
-  --border-strong:    #3E3A30;
+  --border:           #3D3A35;
+  --border-strong:    #5E5A52;
 
-  --step-bg:          rgba(123,110,204,0.13);
-  --step-border:      #7B6ECC;
-  --step-text:        #C4BAF0;
+  --step-bg:          #262522;
+  --step-border:      #5E81AC;
+  --step-text:        #A3BE8C;
 
-  --success-bg:       rgba(72,196,130,0.13);
-  --success-border:   #48C482;
-  --success-text:     #9EEAC4;
+  --success-bg:       rgba(22, 163, 74, 0.15);
+  --success-border:   #4ADE80;
+  --success-text:     #BBF7D0;
 
-  --warn-bg:          rgba(250,170,80,0.13);
-  --warn-border:      #FAAA50;
-  --warn-text:        #FDDBA0;
+  --warn-bg:          rgba(217, 119, 6, 0.15);
+  --warn-border:      #FBBF24;
+  --warn-text:        #FDE68A;
 
-  --card-bg:          #1E1C18;
-  --card-border:      #2E2B24;
+  --help-bg:          #262522;
+  --code-bg:          #111111;
+  --code-text:        #E2E8F0;
 
-  --help-bg:          rgba(123,110,204,0.08);
-  --help-border:      rgba(123,110,204,0.25);
+  --tag-green-bg:     rgba(22, 163, 74, 0.2);
+  --tag-green-fg:     #86EFAC;
+  --tag-blue-bg:      rgba(30, 64, 175, 0.3);
+  --tag-blue-fg:      #93C5FD;
+  --tag-orange-bg:    rgba(146, 64, 14, 0.3);
+  --tag-orange-fg:    #FCD34D;
 
-  --code-bg:          rgba(123,110,204,0.15);
-  --code-text:        #C4BAF0;
-
-  --tag-green-bg:     rgba(72,196,130,0.18);
-  --tag-green-fg:     #9EEAC4;
-  --tag-blue-bg:      rgba(123,110,204,0.18);
-  --tag-blue-fg:      #C4BAF0;
-  --tag-orange-bg:    rgba(250,170,80,0.18);
-  --tag-orange-fg:    #FDDBA0;
-
-  --table-head-bg:    #242218;
-  --table-border:     #2E2B24;
-  --table-row-alt:    rgba(123,110,204,0.05);
-
-  --shadow-card:      0 2px 10px rgba(0,0,0,0.35), 0 0 0 1px var(--border);
-  --shadow-card-hover:0 4px 20px rgba(0,0,0,0.50), 0 0 0 1px var(--border-strong);
+  --shadow-card:      0 4px 6px rgba(0,0,0,0.3), 0 0 0 1px var(--border);
+  --shadow-card-hover:0 6px 16px rgba(0,0,0,0.5), 0 0 0 1px var(--border-strong);
 }
 
 /* ── Base & Typography ────────────────────────────────────────────── */
@@ -162,287 +146,262 @@ html, body, [data-testid="stAppViewContainer"] {
   background: var(--bg-sidebar) !important;
   border-right: 1px solid var(--border) !important;
 }
-[data-testid="stMainBlockContainer"] {
-  background: transparent;
-}
 
-/* ── Header Banner ────────────────────────────────────────────────── */
+/* ── Header Banner - Phong cách Retro x Modern ────────────────────── */
 .main-header {
-  background: linear-gradient(135deg, var(--accent-cta) 0%, #5C4FBF 100%);
-  color: var(--text-on-accent);
-  padding: 1.6rem 2rem;
-  border-radius: 14px;
-  margin-bottom: 1.6rem;
-  text-align: center;
-  box-shadow: 0 4px 24px var(--accent-cta-glow);
-  position: relative;
-  overflow: hidden;
-}
-.main-header::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    repeating-linear-gradient(
-      45deg,
-      rgba(255,255,255,0.03) 0px,
-      rgba(255,255,255,0.03) 1px,
-      transparent 1px,
-      transparent 14px
-    );
+  background: var(--bg-card);
+  border: 2px solid var(--border-strong);
+  color: var(--text-primary);
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 4px 4px 0px var(--border-strong); /* Shadow mảng khối hoài cổ */
+  text-align: left;
+  border-left: 8px solid var(--accent-cta);
 }
 .main-header h1 {
   margin: 0;
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--text-primary);
   letter-spacing: -0.02em;
 }
 .main-header p {
-  margin: .4rem 0 0;
-  opacity: .88;
-  font-size: .9rem;
+  margin: .5rem 0 0;
+  color: var(--text-secondary);
+  font-size: 1rem;
   font-family: 'Roboto Mono', monospace;
-  letter-spacing: 0.02em;
 }
 
-/* ── Step Cards (bước hướng dẫn) ─────────────────────────────────── */
+/* ── Step Cards (Thẻ hướng dẫn) ──────────────────────────────────── */
 .step-box {
-  background: var(--step-bg);
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-left: 4px solid var(--step-border);
-  color: var(--step-text);
-  padding: .85rem 1.1rem;
-  border-radius: 0 10px 10px 0;
+  color: var(--text-primary);
+  padding: 1rem 1.2rem;
+  border-radius: 8px;
   margin-bottom: 1rem;
   font-weight: 600;
-  letter-spacing: 0.01em;
   box-shadow: var(--shadow-card);
 }
-
-/* ── Trạng thái ───────────────────────────────────────────────────── */
-.success-box {
-  background: var(--success-bg);
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--success-border);
-  color: var(--success-text);
-  padding: .85rem 1.1rem;
-  border-radius: 0 10px 10px 0;
-  font-weight: 500;
+.step-box b {
+  color: var(--step-border);
+  font-family: 'Roboto Mono', monospace;
+  font-size: 1.1rem;
+  margin-right: 8px;
 }
-.warn-box {
-  background: var(--warn-bg);
+
+/* ── Alert & Status Cards ─────────────────────────────────────────── */
+.success-box, .warn-box {
+  background: var(--bg-card);
   border: 1px solid var(--border);
-  border-left: 4px solid var(--warn-border);
-  color: var(--warn-text);
-  padding: .85rem 1.1rem;
-  border-radius: 0 10px 10px 0;
+  padding: 1rem 1.2rem;
+  border-radius: 8px;
   margin-bottom: 1.2rem;
   font-weight: 500;
+  box-shadow: var(--shadow-card);
+}
+.success-box {
+  border-left: 5px solid var(--success-border);
+  color: var(--success-text);
+  background: var(--success-bg);
+}
+.warn-box {
+  border-left: 5px solid var(--warn-border);
+  color: var(--warn-text);
+  background: var(--warn-bg);
 }
 
-/* ── Card (ambiguous token) ───────────────────────────────────────── */
+/* ── Ambig Card (Thẻ hiển thị dữ liệu lỗi/chờ xử lý) ──────────────── */
 .ambig-card {
-  background: var(--card-bg);
-  border: 1.5px solid var(--warn-border);
-  border-radius: 12px;
-  padding: 1rem 1.2rem;
-  margin-bottom: 1.1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.2rem;
+  margin-bottom: 1.2rem;
   box-shadow: var(--shadow-card);
-  transition: box-shadow .18s ease;
+  transition: box-shadow .2s ease;
 }
 .ambig-card:hover {
   box-shadow: var(--shadow-card-hover);
 }
 .ambig-token {
   font-family: 'Roboto Mono', monospace;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--warn-border);
-  letter-spacing: 0.03em;
+  background: var(--warn-bg);
+  padding: 2px 8px;
+  border-radius: 4px;
 }
 .ambig-ctx {
-  font-size: .82rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
-  margin: .25rem 0 .5rem;
-  font-style: italic;
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed var(--border);
+  font-family: 'Roboto Mono', monospace;
 }
 
-/* ── Sidebar Help Sections ────────────────────────────────────────── */
+/* ── Hướng dẫn Sidebar (Help Section) ─────────────────────────────── */
 .help-section {
   background: var(--help-bg);
-  border: 1px solid var(--help-border);
-  border-radius: 10px;
-  padding: 1rem 1.2rem;
-  margin-bottom: .9rem;
-  font-size: .88rem;
-  line-height: 1.65;
-  color: var(--text-primary);
-}
-.help-section h4 {
-  margin: 0 0 .55rem;
-  font-size: .95rem;
-  font-weight: 700;
-  color: var(--step-border);
-  letter-spacing: 0.01em;
-}
-.help-section ul {
-  margin: .3rem 0 0 1.1rem;
-  padding: 0;
-}
-.help-section li {
-  margin: .28rem 0;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  line-height: 1.6;
   color: var(--text-secondary);
 }
+.help-section h4 {
+  margin: 0 0 .8rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 4px;
+}
+.help-section ul { padding-left: 1.2rem; margin-top: 0.5rem; }
+.help-section li { margin-bottom: 0.4rem; }
 .help-section code {
   background: var(--code-bg);
   color: var(--code-text);
-  padding: .1rem .38rem;
-  border-radius: 5px;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
   font-family: 'Roboto Mono', monospace;
-  font-size: .81rem;
-  font-weight: 600;
+  border: 1px solid var(--border);
 }
 .help-section table {
   width: 100%;
   border-collapse: collapse;
-  font-size: .83rem;
-  margin-top: .55rem;
+  margin-top: 0.8rem;
+  background: var(--bg-card);
 }
 .help-section th {
   text-align: left;
-  padding: .35rem .55rem;
-  font-weight: 700;
-  background: var(--table-head-bg);
-  color: var(--text-secondary);
-  border-bottom: 2px solid var(--table-border);
+  padding: 0.5rem;
+  font-weight: 600;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
   font-family: 'Roboto Mono', monospace;
-  font-size: .80rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: 0.75rem;
 }
 .help-section td {
-  padding: .32rem .55rem;
-  border-bottom: 1px solid var(--table-border);
-  color: var(--text-primary);
-}
-.help-section tr:nth-child(even) td {
-  background: var(--table-row-alt);
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
 }
 
 /* ── Tags ─────────────────────────────────────────────────────────── */
 .tag {
   display: inline-block;
-  padding: .1rem .5rem;
-  border-radius: 20px;
-  font-size: .76rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
   font-family: 'Roboto Mono', monospace;
 }
-.tag-green  { background: var(--tag-green-bg);  color: var(--tag-green-fg);  }
-.tag-blue   { background: var(--tag-blue-bg);   color: var(--tag-blue-fg);   }
-.tag-orange { background: var(--tag-orange-bg); color: var(--tag-orange-fg); }
+.tag-green  { background: var(--tag-green-bg);  color: var(--tag-green-fg);  border: 1px solid var(--success-border);}
+.tag-blue   { background: var(--tag-blue-bg);   color: var(--tag-blue-fg);   border: 1px solid var(--step-border);}
+.tag-orange { background: var(--tag-orange-bg); color: var(--tag-orange-fg); border: 1px solid var(--warn-border);}
 
-/* ── Example row ──────────────────────────────────────────────────── */
-.example-row {
-  font-family: 'Roboto Mono', monospace;
-  font-size: .81rem;
-  word-break: break-all;
-  color: var(--code-text);
-  background: var(--code-bg);
-  padding: .35rem .6rem;
-  border-radius: 6px;
-  border-left: 3px solid var(--accent-cta);
-}
+/* ── Streamlit Widget Overrides - Ép chuẩn Card-based ─────────────── */
 
-/* ── Streamlit widget overrides ───────────────────────────────────── */
-/* Nút primary – high contrast CTA */
+/* Nút CTA (Chuyển đổi, Xác nhận) - High Contrast */
 [data-testid="stBaseButton-primary"] {
   background: var(--accent-cta) !important;
   color: #FFFFFF !important;
-  border: none !important;
-  border-radius: 8px !important;
+  border: 2px solid var(--accent-cta) !important;
+  border-radius: 6px !important;
   font-weight: 700 !important;
-  letter-spacing: 0.02em !important;
-  box-shadow: 0 2px 14px var(--accent-cta-glow) !important;
-  transition: background .18s ease, box-shadow .18s ease, transform .12s ease !important;
+  font-size: 1.05rem !important;
+  padding: 0.6rem 1rem !important;
+  box-shadow: 0 4px 14px var(--accent-cta-glow) !important;
+  transition: all 0.2s ease !important;
 }
 [data-testid="stBaseButton-primary"]:hover {
   background: var(--accent-cta-hover) !important;
-  box-shadow: 0 4px 22px var(--accent-cta-glow) !important;
-  transform: translateY(-1px) !important;
+  border-color: var(--accent-cta-hover) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px var(--accent-cta-glow) !important;
 }
-/* Nút secondary */
+
+/* Nút phụ (Quay lại) */
 [data-testid="stBaseButton-secondary"] {
-  border: 1.5px solid var(--border-strong) !important;
-  border-radius: 8px !important;
+  border: 2px solid var(--border-strong) !important;
+  border-radius: 6px !important;
   color: var(--text-primary) !important;
   background: var(--bg-card) !important;
+  font-weight: 600 !important;
 }
-/* Expander */
+[data-testid="stBaseButton-secondary"]:hover {
+  background: var(--bg-page) !important;
+  border-color: var(--text-primary) !important;
+}
+
+/* Expander (Khối nội dung gập/mở) */
 [data-testid="stExpander"] {
   border: 1px solid var(--border) !important;
-  border-radius: 10px !important;
+  border-radius: 8px !important;
   background: var(--bg-card) !important;
   box-shadow: var(--shadow-card) !important;
-  margin-bottom: .6rem;
+  margin-bottom: 0.8rem;
 }
 [data-testid="stExpander"] summary {
   font-weight: 600 !important;
   color: var(--text-primary) !important;
+  padding: 0.5rem !important;
 }
-/* Radio button */
-[data-testid="stRadio"] label {
+
+/* Radio button & Selectbox */
+[data-testid="stRadio"] label, [data-testid="stSelectbox"] label {
   color: var(--text-primary) !important;
+  font-weight: 600 !important;
 }
-/* Selectbox */
 [data-testid="stSelectbox"] > div > div {
-  border: 1.5px solid var(--border) !important;
-  border-radius: 8px !important;
+  border: 1px solid var(--border-strong) !important;
+  border-radius: 6px !important;
   background: var(--bg-card) !important;
   color: var(--text-primary) !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02) !important;
 }
+
 /* File uploader */
 [data-testid="stFileUploader"] {
   border: 2px dashed var(--border-strong) !important;
-  border-radius: 12px !important;
-  background: var(--step-bg) !important;
+  border-radius: 8px !important;
+  background: var(--bg-card) !important;
+  padding: 1rem !important;
 }
 [data-testid="stFileUploader"]:hover {
   border-color: var(--accent-cta) !important;
-  background: var(--accent-cta-light) !important;
+  background: var(--bg-page) !important;
 }
+
 /* Progress bar */
 [data-testid="stProgressBar"] > div > div {
   background: var(--accent-cta) !important;
   border-radius: 4px;
 }
-/* Alerts */
-[data-testid="stAlert"] {
-  border-radius: 10px !important;
-}
+
 /* Code block log area */
 [data-testid="stCode"] {
-  border-radius: 10px !important;
-  border: 1px solid var(--border) !important;
-  font-family: 'Roboto Mono', monospace !important;
+  border-radius: 6px !important;
+  border: 1px solid var(--border-strong) !important;
+  background: var(--code-bg) !important;
 }
-/* Markdown text */
-.stMarkdown, .stText, label {
-  color: var(--text-primary) !important;
-}
-/* Sidebar labels */
+
+/* Fix text colors globally */
+.stMarkdown, .stText, label { color: var(--text-primary) !important; }
 [data-testid="stSidebar"] .stMarkdown,
-[data-testid="stSidebar"] label {
-  color: var(--text-primary) !important;
-}
-/* Scrollbar (Webkit) */
-::-webkit-scrollbar { width: 7px; height: 7px; }
-::-webkit-scrollbar-track { background: var(--bg-page); }
-::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 4px;
-}
+[data-testid="stSidebar"] label { color: var(--text-primary) !important; }
+
+/* Scrollbar vuông vắn gọn gàng */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-page); border-left: 1px solid var(--border); }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 0px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
 </style>
@@ -503,7 +462,7 @@ with st.sidebar:
 <div class="help-section">
 <h4>Cấu trúc cơ bản</h4>
 <p>Dữ liệu theo dạng <b>Tên môn: danh sách lớp</b>, nhiều môn ngăn cách bằng <code>+</code></p>
-<div class="example-row">Hóa: 10A1, 10A2 + Sử: 10D1, 10D2</div>
+<code>Hóa: 10A1, 10A2 + Sử: 10D1, 10D2</code>
 
 <h4>Tách lớp thông minh nhờ cột GVCN</h4>
 <p>Khi có cột GVCN, hệ thống xây dựng danh sách lớp hợp lệ. Nếu một chuỗi có <b>nhiều cách tách hợp lệ</b>, hệ thống hiển thị hộp hỏi để bạn chọn.</p>
@@ -526,72 +485,6 @@ with st.sidebar:
 </table>
 </div>
 """, unsafe_allow_html=True)
-
-#     with st.expander("🔤  3. Nhận diện tên môn học", expanded=False):
-#         st.markdown("""
-# <div class="help-section">
-# <h4>Bảng mã môn học</h4>
-# <table>
-#   <tr><th>Tên môn</th><th>Mã</th></tr>
-#   <tr><td>Ngữ văn / Văn</td><td><code>NGUVAN</code></td></tr>
-#   <tr><td>Toán / Toán học</td><td><code>TOAN</code></td></tr>
-#   <tr><td>Tiếng Anh / Anh / NN1</td><td><code>ANH</code></td></tr>
-#   <tr><td>Lịch sử / Sử</td><td><code>LICHSU</code></td></tr>
-#   <tr><td>Địa lý / Địa</td><td><code>DIALY</code></td></tr>
-#   <tr><td>Vật lý / Lý</td><td><code>VATLY</code></td></tr>
-#   <tr><td>Hóa học / Hóa</td><td><code>HOAHOC</code></td></tr>
-#   <tr><td>Sinh học / Sinh</td><td><code>SINH</code></td></tr>
-#   <tr><td>Tin học / Tin</td><td><code>TINHOC</code></td></tr>
-#   <tr><td>GDTC / Thể dục</td><td><code>GDTC</code></td></tr>
-#   <tr><td>GDQP / Quốc phòng</td><td><code>GDQP</code></td></tr>
-#   <tr><td>KTPL / GDKTPL</td><td><code>GDKTPL</code></td></tr>
-#   <tr><td>GDĐP / GDDP</td><td><code>NDGDDP</code></td></tr>
-#   <tr><td>HĐTN / TNHN</td><td><code>TNHN</code></td></tr>
-#   <tr><td>Công nghệ</td><td><code>CONGNGHE</code></td></tr>
-#   <tr><td>KHTN</td><td><code>KHTN</code></td></tr>
-#   <tr><td>Lịch sử &amp; Địa lý</td><td><code>LICHSUDIALI</code></td></tr>
-# </table>
-# </div>
-# """, unsafe_allow_html=True)
-
-#     with st.expander("📊  4. Cấu trúc file đầu ra", expanded=False):
-#         st.markdown("""
-# <div class="help-section">
-# <h4>File output gồm 3 sheet</h4>
-# <p><span class="tag tag-blue">Sheet 1: Class</span> — danh sách lớp, sắp theo khối</p>
-# <p><span class="tag tag-green">Sheet 2: Teachers</span></p>
-# <table>
-#   <tr><th>Cột</th><th>Nội dung</th></tr>
-#   <tr><td>STT</td><td>Số thứ tự</td></tr>
-#   <tr><td>Họ tên</td><td>Tên giáo viên</td></tr>
-#   <tr><td>Ngày sinh</td><td>dd/mm/yyyy</td></tr>
-#   <tr><td>SĐT</td><td>Để trống</td></tr>
-#   <tr><td>Môn dạy</td><td>Mã môn, cách nhau dấu phẩy</td></tr>
-#   <tr><td>TBM</td><td>Để trống</td></tr>
-#   <tr><td>CN</td><td>Lớp chủ nhiệm (từ cột GVCN)</td></tr>
-#   <tr><td>PCCM</td><td><code>10A1-TOAN,11B2-ANH</code></td></tr>
-# </table>
-# <p><span class="tag tag-orange">Sheet 3: Students</span> — tiêu đề cố định, dữ liệu trống</p>
-# </div>
-# """, unsafe_allow_html=True)
-
-#     with st.expander("⚠️  5. Xử lý trùng lặp & lưu ý", expanded=False):
-#         st.markdown("""
-# <div class="help-section">
-# <h4>Xử lý tổ hợp môn-lớp trùng</h4>
-# <ul>
-#   <li><b>Trùng trong cùng 1 GV:</b> bỏ tự động</li>
-#   <li><b>Trùng giữa 2+ GV:</b> thêm tên GV để phân biệt</li>
-# </ul>
-# <div class="example-row">12A2-HOAHOC(Nguyễn Tuấn Anh)<br>12A2-HOAHOC(Đoàn Văn Chiến)</div>
-# <h4>Không có cột GVCN</h4>
-# <ul>
-#   <li>Cột CN trong output để trống</li>
-#   <li>Không có từ điển lớp → không hỏi ambiguous, dùng logic tách cũ</li>
-# </ul>
-# </div>
-# """, unsafe_allow_html=True)
-
 
 # ── SESSION STATE ─────────────────────────────────────────────────────────────
 for k, v in [("phase","upload"),("ambig_list",[]),("resolved",{}),
@@ -665,7 +558,7 @@ def _load_df_and_known(raw_bytes):
 st.markdown("""
 <div class="main-header">
   <h1>🍹 Tạo file Import PCCM</h1>
-  <p>File Input cần có sheet <b>Data</b> (hoặc sẽ lấy sheet đầu tiên của file)</p>
+  <p>Hệ thống tự động chuẩn hóa dữ liệu & gán mã môn học</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -675,20 +568,19 @@ st.markdown("""
 # ════════════════════════════════════════════════════════════════════════════
 if st.session_state.phase == "upload":
 
-    st.markdown('<div class="step-box"><b>1️⃣</b> Tải lên file cần chuyển đổi PCCM</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="step-box"><b>1</b> Chọn File đầu vào (Sheet: Data)</div>', unsafe_allow_html=True)
     uploaded = st.file_uploader("Chọn file Excel", type=["xlsx","xls","xlsm"],
                                  label_visibility="collapsed")
 
-    st.markdown('<div class="step-box"><b>2️⃣</b> Chọn niên khóa</div>', unsafe_allow_html=True)
+    st.markdown('<div class="step-box"><b>2</b> Áp dụng niên khóa</div>', unsafe_allow_html=True)
     nien_khoa = st.selectbox("Niên khóa", options=NIEN_KHOA_OPTIONS, label_visibility="collapsed")
 
-    st.markdown('<div class="step-box"><b>3️⃣</b> Nhấn <code><b>Chuyển đổi</b></code> để xử lý</div>', unsafe_allow_html=True)
-    run_btn = st.button("▶  Chuyển đổi", type="primary", use_container_width=True,
+    st.markdown('<div class="step-box"><b>3</b> Tiến hành xử lý dữ liệu</div>', unsafe_allow_html=True)
+    run_btn = st.button("▶ Chuyển đổi", type="primary", use_container_width=True,
                         disabled=(uploaded is None))
 
     if uploaded is None:
-        st.info("✌️ Vui lòng tải lên file Excel đầu vào ✌️")
+        st.info("✌️ Vui lòng tải lên file Excel đầu vào để bắt đầu quá trình.")
 
     if run_btn and uploaded:
         raw_bytes = uploaded.read()
@@ -739,8 +631,8 @@ elif st.session_state.phase == "confirm_ambig":
 
     st.markdown(f"""
 <div class="warn-box">
-⚠️ <b>Phát hiện {len(ambig_list)} chuỗi lớp có thể tách theo nhiều cách.</b><br>
-Vui lòng chọn cách tách đúng cho từng chuỗi bên dưới, sau đó nhấn <b>Xác nhận & Tiếp tục</b>.
+⚠️ <b>Phát hiện {len(ambig_list)} chuỗi lớp có nhiều cách hiểu.</b><br>
+Vui lòng làm rõ định dạng tách đúng trước khi hệ thống tiếp tục.
 </div>
 """, unsafe_allow_html=True)
 
@@ -752,31 +644,30 @@ Vui lòng chọn cách tách đúng cho từng chuỗi bên dưới, sau đó nh
         occs   = item["occurrences"]
         option_labels = [", ".join(s) for s in splits]
 
-        ctx_text = " &nbsp;|&nbsp; ".join(occs[:3]) + ("…" if len(occs) > 3 else "")
+        ctx_text = " • ".join(occs[:3]) + ("…" if len(occs) > 3 else "")
         st.markdown(f"""
 <div class="ambig-card">
-  <div>Chuỗi gốc: <span class="ambig-token">{token}</span></div>
-  <div class="ambig-ctx">📍 {ctx_text}</div>
+  <div style="margin-bottom: 8px;">Chuỗi phát hiện: <span class="ambig-token">{token}</span></div>
+  <div class="ambig-ctx">Ngữ cảnh: {ctx_text}</div>
 </div>
 """, unsafe_allow_html=True)
 
         chosen = st.radio(
-            f"**`{token}`** là:",
+            f"Vui lòng chọn cách hiểu đúng cho **`{token}`**:",
             options=option_labels,
             key=f"radio_{token}",
             horizontal=len(option_labels) <= 4,
         )
         choices[token] = splits[option_labels.index(chosen)]
-        st.markdown("---")
+        st.markdown("<br>", unsafe_allow_html=True)
 
     col_back, col_confirm = st.columns([1, 3])
     with col_back:
-        if st.button("← Quay lại", use_container_width=True):
+        if st.button("← Hủy và Quay lại", use_container_width=True):
             _reset()
     with col_confirm:
-        if st.button("✅  Xác nhận & Tiếp tục", type="primary", use_container_width=True):
+        if st.button("Xác nhận & Tiếp tục  ✅", type="primary", use_container_width=True):
             st.session_state.resolved = choices
-            # Sau ambig → kiểm tra xem có môn không nhận ra không
             if st.session_state.get("unknown_list"):
                 st.session_state.resolved_subjects = {}
                 st.session_state.phase = "confirm_subjects"
@@ -790,58 +681,54 @@ Vui lòng chọn cách tách đúng cho từng chuỗi bên dưới, sau đó nh
 # ════════════════════════════════════════════════════════════════════════════
 elif st.session_state.phase == "confirm_subjects":
     unknown_list = st.session_state.unknown_list
-    # Hiển thị tất cả mã môn từ cả 3 cấp
-    KEEP_RAW = "— Giữ nguyên (không map) —"
+    KEEP_RAW = "— Giữ nguyên (bỏ qua) —"
     code_options = [KEEP_RAW] + sorted(set(_ALL_CODES))
 
     st.markdown(f"""
 <div class="warn-box">
-⚠️ <b>Phát hiện {len(unknown_list)} tên môn chưa nhận diện được.</b><br>
-Vui lòng chọn mã môn tương ứng cho từng tên bên dưới, sau đó nhấn <b>Xác nhận & Tiếp tục</b>.
+⚠️ <b>Cần làm rõ mã cho {len(unknown_list)} tên môn học.</b><br>
+Hệ thống không tìm thấy mã chuẩn cho các tên gọi dưới đây.
 </div>
 """, unsafe_allow_html=True)
 
-    subj_choices = {}  # raw_lower → code
+    subj_choices = {}  
 
     for item in unknown_list:
         raw        = item["raw"]
         suggestion = item["suggestion"]
         occs       = item["occurrences"]
 
-        # Index mặc định: dùng gợi ý nếu có
         default_idx = code_options.index(suggestion) if suggestion and suggestion in code_options else 0
-
-        ctx_text = " &nbsp;|&nbsp; ".join(occs[:3]) + ("…" if len(occs) > 3 else "")
+        ctx_text = " • ".join(occs[:3]) + ("…" if len(occs) > 3 else "")
+        
         st.markdown(f"""
 <div class="ambig-card">
-  <div>Tên môn gốc: <span class="ambig-token">{raw}</span>
-    {"&nbsp; 💡 Gợi ý: <b>" + suggestion + "</b>" if suggestion else ""}
+  <div style="margin-bottom: 8px;">Tên môn gốc: <span class="ambig-token">{raw}</span>
+    {"<span style='margin-left: 10px; font-size: 0.9em; color: var(--success-border);'>💡 Gợi ý của hệ thống: <b>" + suggestion + "</b></span>" if suggestion else ""}
   </div>
-  <div class="ambig-ctx">📍 {ctx_text}</div>
+  <div class="ambig-ctx">Ngữ cảnh: {ctx_text}</div>
 </div>
 """, unsafe_allow_html=True)
 
         chosen = st.selectbox(
-            f"Mã môn cho **\"{raw}\"**:",
+            f"Chọn mã chuẩn cho môn **\"{raw}\"**:",
             options=code_options,
             index=default_idx,
             key=f"subj_{raw}",
         )
         subj_choices[raw.lower().strip()] = None if chosen == KEEP_RAW else chosen
-        st.markdown("---")
+        st.markdown("<br>", unsafe_allow_html=True)
 
     col_back, col_confirm = st.columns([1, 3])
     with col_back:
-        if st.button("← Quay lại", use_container_width=True):
-            # Nếu trước đó có ambig thì về confirm_ambig, không thì về upload
+        if st.button("← Hủy và Quay lại", use_container_width=True):
             if st.session_state.get("ambig_list"):
                 st.session_state.phase = "confirm_ambig"
             else:
                 _reset()
             st.rerun()
     with col_confirm:
-        if st.button("✅  Xác nhận & Tiếp tục", type="primary", use_container_width=True):
-            # Chỉ lưu những môn đã chọn mã (bỏ qua KEEP_RAW)
+        if st.button("Xác nhận & Tiếp tục  ✅", type="primary", use_container_width=True):
             st.session_state.resolved_subjects = {
                 k: v for k, v in subj_choices.items() if v is not None
             }
@@ -853,8 +740,9 @@ Vui lòng chọn mã môn tương ứng cho từng tên bên dưới, sau đó n
 # PHASE 3 — XỬ LÝ
 # ════════════════════════════════════════════════════════════════════════════
 elif st.session_state.phase == "processing":
-    log_area  = st.empty()
+    st.markdown('<div class="step-box">⏳ Đang xử lý dữ liệu tự động...</div>', unsafe_allow_html=True)
     prog_bar  = st.progress(0)
+    log_area  = st.empty()
     log_lines = []
 
     raw_bytes = st.session_state.raw_bytes
@@ -895,8 +783,8 @@ elif st.session_state.phase == "processing":
         st.rerun()
     except Exception as e:
         prog_bar.empty()
-        st.error(f"❌ Lỗi: {e}")
-        if st.button("← Làm lại từ đầu"):
+        st.error(f"❌ Phát sinh lỗi trong quá trình xử lý: {e}")
+        if st.button("← Quay lại từ đầu"):
             _reset()
 
 
@@ -906,27 +794,30 @@ elif st.session_state.phase == "processing":
 elif st.session_state.phase == "done":
     _nk_done = st.session_state.get("nien_khoa", "")
 
-    summary_lines = []
-    if st.session_state.get("resolved"):
-        for tok, cls_list in st.session_state.resolved.items():
-            summary_lines.append(f"• Lớp `{tok}` → **{', '.join(cls_list)}**")
-    if st.session_state.get("resolved_subjects"):
-        for raw, code in st.session_state.resolved_subjects.items():
-            summary_lines.append(f"• Môn **\"{raw}\"** → `{code}`")
-    if summary_lines:
-        with st.expander(f"ℹ️ {len(summary_lines)} mục đã xác nhận thủ công", expanded=False):
-            st.markdown("\n".join(summary_lines))
-
-    st.markdown(f'<div class="success-box">✅ <b>Chuyển đổi thành công!</b>'
-                f' &nbsp;|&nbsp; Niên khóa: <b>{_nk_done}</b></div>',
+    st.markdown(f'<div class="success-box" style="font-size: 1.1rem; padding: 1.5rem;">✅ <b>HOÀN TẤT CHUYỂN ĐỔI!</b><br>'
+                f'<span style="font-weight: normal; font-size: 0.95rem; color: var(--text-secondary);">Dữ liệu niên khóa <b>{_nk_done}</b> đã sẵn sàng.</span></div>',
                 unsafe_allow_html=True)
+                
     st.download_button(
-        "⬇️  Tải xuống file Excel",
+        "⬇️  Lưu File Excel",
         data=st.session_state.result_bytes,
         file_name=st.session_state.result_filename,
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        type="primary",
         use_container_width=True,
     )
-    st.markdown("---")
-    if st.button("🔄  Chuyển đổi file khác", use_container_width=True):
+    
+    summary_lines = []
+    if st.session_state.get("resolved"):
+        for tok, cls_list in st.session_state.resolved.items():
+            summary_lines.append(f"- Lớp `{tok}` → **{', '.join(cls_list)}**")
+    if st.session_state.get("resolved_subjects"):
+        for raw, code in st.session_state.resolved_subjects.items():
+            summary_lines.append(f"- Môn **\"{raw}\"** → `{code}`")
+    if summary_lines:
+        with st.expander(f"📋 Bảng tra soát thay đổi thủ công ({len(summary_lines)} mục)", expanded=False):
+            st.markdown("\n".join(summary_lines))
+
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    if st.button("🔄 Bắt đầu lượt xử lý mới", use_container_width=True):
         _reset()
