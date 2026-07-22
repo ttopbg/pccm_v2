@@ -74,7 +74,7 @@ SUBJECT_MAP_THCS = {
     "nghệ thuật (âm nhạc)":"NGHETHUAT(NHAC)","am nhac":"NGHETHUAT(NHAC)","âm nhạc":"NGHETHUAT(NHAC)",
     "nhạc":"NGHETHUAT(NHAC)","nhac":"NGHETHUAT(NHAC)","nghệ thuật (mĩ thuật)":"NGHETHUAT(MT)",
     "mỹ thuật":"NGHETHUAT(MT)","mĩ thuật":"NGHETHUAT(MT)","my thuat":"NGHETHUAT(MT)","mi thuat":"NGHETHUAT(MT)",
-    "nghệ thuật":"NGHETHUAT","nghe thuat":"NGHETHUAT","mt":"NGHETHUAT(MT)",
+    "nghệ thuật":"NGHETHUAT","nghe thuat":"NGHETHUAT",
     "hoạt động trải nghiệm":"TNHN","hoat dong trai nghiem":"TNHN","hdtn":"TNHN",
     "hđtn":"TNHN","tnhn":"TNHN","hđ trải nghiệm":"TNHN",
     "tiếng pháp":"TIENGPHAP","tieng phap":"TIENGPHAP","pháp":"TIENGPHAP",
@@ -83,28 +83,23 @@ SUBJECT_MAP_THCS = {
     "tiếng trung":"TIENGTRUNG","tieng trung":"TIENGTRUNG",
     "tiếng hàn":"TIENGHAN","tieng han":"TIENGHAN",
     # Khoa học tự nhiên — phân môn
+    "khoa học tự nhiên (lí)":"KHTN(VATLY)","vật lý":"KHTN(VATLY)","vat ly":"KHTN(VATLY)",
     "vật lí":"KHTN(VATLY)","vat li":"KHTN(VATLY)","lý":"KHTN(VATLY)","lí":"KHTN(VATLY)",
     "ly":"KHTN(VATLY)","li":"KHTN(VATLY)","vatly":"KHTN(VATLY)","vl":"KHTN(VATLY)",
-    "khoa học tự nhiên (lí)":"KHTN(VATLY)","vật lý":"KHTN(VATLY)","vat ly":"KHTN(VATLY)",
-    "khoa học tự nhiên(lí)":"KHTN(VATLY)","khtn(lí)":"KHTN(VATLY)",
-    "khoa học tự nhiên(lý)":"KHTN(VATLY)","khtn(lý)":"KHTN(VATLY)",
-    "hóa":"KHTN(HOAHOC)","hoá":"KHTN(HOAHOC)","hoa":"KHTN(HOAHOC)","hoahoc":"KHTN(HOAHOC)",
-    "hh":"KHTN(HOAHOC)","hoá học":"KHTN(HOAHOC)","khtn(h)":"KHTN(HOAHOC)",
-    "khoa học tự nhiên(hóa)":"KHTN(HOAHOC)","khtn(hóa)":"KHTN(HOAHOC)","khtn(hoá)":"KHTN(HOAHOC)",
     "khoa học tự nhiên (hóa)":"KHTN(HOAHOC)","hóa học":"KHTN(HOAHOC)","hoa hoc":"KHTN(HOAHOC)",
+    "hóa":"KHTN(HOAHOC)","hoá":"KHTN(HOAHOC)","hoa":"KHTN(HOAHOC)","hoahoc":"KHTN(HOAHOC)",
+    "hh":"KHTN(HOAHOC)","hoá học":"KHTN(HOAHOC)",
     "khoa học tự nhiên (sinh)":"KHTN(SINH)","sinh học":"KHTN(SINH)","sinh hoc":"KHTN(SINH)",
-    "khoa học tự nhiên(sinh)":"KHTN(SINH)","khtn(sinh)":"KHTN(SINH)","khtn(s)":"KHTN(SINH)",
     "sinh":"KHTN(SINH)",
     "khoa học tự nhiên":"KHTN","khoa hoc tu nhien":"KHTN","khtn":"KHTN",
     # Lịch sử & Địa lí — phân môn
-    "lich su va dia ly":"LICHSUDIALI","ls&đl":"LICHSUDIALI","ls & đl":"LICHSUDIALI","lsdl":"LICHSUDIALI",
-    "lịch sử và địa lí":"LICHSUDIALI","lịch sử và địa lý":"LICHSUDIALI",
     "lịch sử và địa lí (địa)":"LICHSUDIALI(DIA)","lịch sử và địa lý (địa)":"LICHSUDIALI(DIA)",
-    "địa lí":"LICHSUDIALI(DIA)","địa lý":"LICHSUDIALI(DIA)","ls&đl(địa)":"LICHSUDIALI(DIA)","ls & đl(địa)":"LICHSUDIALI(DIA)",
+    "địa lí":"LICHSUDIALI(DIA)","địa lý":"LICHSUDIALI(DIA)",
     "dia li":"LICHSUDIALI(DIA)","dia ly":"LICHSUDIALI(DIA)","địa":"LICHSUDIALI(DIA)","dia":"LICHSUDIALI(DIA)",
-    "ls & đl(sử)":"LICHSUDIALI(SU)","ls&đl(sử)":"LICHSUDIALI(SU)",
     "lịch sử và địa lí (sử)":"LICHSUDIALI(SU)","lịch sử và địa lý (sử)":"LICHSUDIALI(SU)",
     "lịch sử":"LICHSUDIALI(SU)","lich su":"LICHSUDIALI(SU)","sử":"LICHSUDIALI(SU)","su":"LICHSUDIALI(SU)",
+    "lịch sử và địa lí":"LICHSUDIALI","lịch sử và địa lý":"LICHSUDIALI",
+    "lich su va dia ly":"LICHSUDIALI","ls&đl":"LICHSUDIALI","ls & đl":"LICHSUDIALI","lsdl":"LICHSUDIALI",
 }
 
 # THPT (khối 10–12) — giữ nguyên bảng cũ
@@ -325,32 +320,30 @@ def expand_class_range(text, known_classes=None, resolved_ambiguities=None):
 
     # Bỏ sĩ số trong ngoặc: 10A1(52) → 10A1
     text = re.sub(r'((?:0?[1-9]|1[0-2])[A-Za-zÀ-ỹ]+\d*)\(\d+\)', r'\1', text, flags=re.UNICODE)
-    # Xử lý dạng 7A,B,C,D → 7A,7B,7C,7D
-    text = _preprocess_alpha_suffixes(text)
+
+    # Mở rộng suffix (số + chữ): 7A,B,C,D → 7A,7B,7C,7D / 11A4,5 → 11A4,11A5
+    text = _expand_suffix_groups_in_text(text)
+
     classes = []
 
-    # ── Xử lý compact chữ cái: 7ABCD → [7A,7B,7C,7D] ─────────────────────────
+    # ── Xử lý compact chữ cái: 7ABCD → [7A,7B,7C,7D] (khi có known_classes) ─
     # Pattern: khối + 2+ chữ cái + KHÔNG có số → dạng compact alpha
     _alpha_compact_pat = re.compile(
         r'(?<![A-Za-z\d])(0?[1-9]|1[0-2])([A-Za-zÀ-ỹ]{2,})(?!\d)', re.UNICODE)
     def _expand_alpha(m):
         grade, alphas = m.group(1), m.group(2)
         token = f"{grade}{alphas}"
-        # Token đã là 1 lớp hợp lệ trong known → giữ nguyên (ví dụ: trường có lớp 7AB)
+        # Nếu token đã là 1 lớp hợp lệ trong known → giữ nguyên, không tách
         if known_classes and token in known_classes:
             classes.append(token)
             return ''
-        # Có known → thử greedy tách theo known
         if known_classes:
             split_result = _split_alpha_compact(grade, alphas, known_classes)
             if split_result:
                 classes.extend(split_result)
                 return ''
-        # Fallback (không có known HOẶC không tách được qua known):
-        # tách mỗi chữ cái thành 1 lớp — đây là cách tự nhiên nhất
-        # Ví dụ: 9ABCD (known chỉ có 9A) → [9A,9B,9C,9D]
-        classes.extend(f"{grade}{ch}" for ch in alphas)
-        return ''
+        # Không tách được → để lại cho regex bình thường bên dưới xử lý
+        return m.group()
     text = _alpha_compact_pat.sub(_expand_alpha, text)
 
     # ── Xử lý range: 1A1-1A5, 9B1 đến 9B3, 10A1-10A5 ──────────────────────
@@ -599,47 +592,27 @@ def detect_unknown_subjects(df, col_pccm, cap_hoc: str = "AUTO"):
 
     return list(found.values())
 
-def _preprocess_alpha_suffixes(text):
-    """
-    Tiền xử lý: thêm grade prefix cho chữ cái đơn đứng sau lớp có dấu phẩy.
-    Xử lý dạng '7A,B,C,D' hoặc '7A, B, C, D' → '7A,7B,7C,7D'.
-    Không ảnh hưởng đến: '7ABCD' (compact liền), '7A1,2,3' (suffix số), '7A,7B' (đã đủ).
-
-    Ví dụ:
-      '7A,B,C,D'         → '7A,7B,7C,7D'
-      '10A,B,C'          → '10A,10B,10C'
-      '12A,B'            → '12A,12B'
-      'Văn: 8A,B + Lý: 9A,B,C' → 'Văn: 8A,8B + Lý: 9A,9B,9C'
-      '7A1,2,3'          → '7A1,2,3'   (số suffix, không đổi)
-      '7ABCD'            → '7ABCD'     (compact liền, không đổi)
-    """
-    _PAT = re.compile(
-        r'((?:0?[1-9]|1[0-2])[A-Za-zÀ-ỹ]+\d*)'          # lớp đầu: 7A, 10A, 7A1
-        r'((?:\s*,\s*[A-Za-zÀ-ỹ](?![A-Za-zÀ-ỹ0-9]))+)',  # ,B ,C ,D (chữ đơn không grade)
-        re.UNICODE
-    )
-    def _expand(m):
-        base_cls = m.group(1)
-        tail     = m.group(2)
-        gm = re.match(r'^(0?[1-9]|1[0-2])(?=[A-Za-zÀ-ỹ])', base_cls, re.UNICODE)
-        if not gm: return m.group()
-        grade    = gm.group(1)
-        suffixes = re.findall(r'[A-Za-zÀ-ỹ](?![A-Za-zÀ-ỹ0-9])', tail)
-        return base_cls + ',' + ','.join(f'{grade}{s}' for s in suffixes)
-    return _PAT.sub(_expand, text)
-
-
 def _expand_suffix_groups_in_text(text):
     """
     Tiền xử lý: mở rộng suffix groups ngay trong chuỗi text TRƯỚC KHI tokenize.
-    '11A4,5,11,12A6,7' → '11A4,11A5,11A11,12A6,12A7'
-    '10A1,2,3'         → '10A1,10A2,10A3'
-    '11A3, 12D'        → '11A3, 12D'  (12D = lớp riêng, không phải suffix)
-    '7A,B,C,D'         → '7A,7B,7C,7D'  (qua _preprocess_alpha_suffixes)
-    Phân biệt lớp không có số (12D, 11D) với số suffix (4, 5, 11).
+    Xử lý cả suffix số lẫn suffix chữ cái:
+      '11A4,5,11,12A6,7' → '11A4,11A5,11A11,12A6,12A7'   (số suffix)
+      '10A1,2,3'         → '10A1,10A2,10A3'
+      '7A,B,C,D'         → '7A,7B,7C,7D'                  (chữ suffix)
+      '11A3, 12D'        → '11A3, 12D'  (12D = lớp riêng)
     """
-    # Bước 0: xử lý dạng 7A,B,C,D → 7A,7B,7C,7D trước khi tokenize
-    text = _preprocess_alpha_suffixes(text)
+    # ── Bước 0: alpha suffix "7A,B,C,D" → "7A,7B,7C,7D" ────────────────────
+    _GP0 = r'(?:0?[1-9]|1[0-2])'
+    def _alpha_sfx(m):
+        base_cls = m.group(1)
+        grade    = re.match(r'(' + _GP0 + r')', base_cls).group(1)
+        extra    = re.findall(r'[A-Za-zÀ-ỹ](?![A-Za-zÀ-ỹ\d])', m.group(2))
+        return ','.join([base_cls] + [f"{grade}{ch}" for ch in extra])
+    text = re.sub(
+        r'(' + _GP0 + r'[A-Za-zÀ-ỹ]+(?!\d))'
+        r'((?:\s*[,;]\s*[A-Za-zÀ-ỹ](?![A-Za-zÀ-ỹ\d]))+)',
+        _alpha_sfx, text, flags=re.UNICODE
+    )
     _GP = r'(?:0?[1-9]|1[0-2])'
     # Tokenizer phân biệt 3 loại: lớp có số cuối, lớp không có số, số thuần
     _TOK = re.compile(
@@ -751,6 +724,7 @@ def parse_pccm(raw_pccm, known_classes=None, resolved_ambiguities=None):
     def flush(s,c,o):
         if s and c: o.append((s,c))
         elif c: o.append(("",c))
+        elif s: o.append((s,[]))   # Môn có tên nhưng KHÔNG kèm lớp -> vẫn giữ lại
     idx=0
     while idx<len(merged):
         kind,val = merged[idx]
@@ -767,7 +741,11 @@ def parse_pccm(raw_pccm, known_classes=None, resolved_ambiguities=None):
                 flush(cur_subj,cur_cls,results); cur_subj=val; cur_cls=[]
                 idx+=1
                 while idx<len(merged) and merged[idx][0]=='sep': idx+=1
-            else: idx+=1
+            else:
+                # Môn được nhắc tới nhưng không có lớp/':' theo sau (VD: "...+ Tin học")
+                flush(cur_subj,cur_cls,results)
+                cur_subj=val; cur_cls=[]
+                idx+=1
         elif kind=='class':
             cur_cls.extend(expand_class_range(val, known_classes, resolved_ambiguities))
             idx+=1
@@ -808,6 +786,61 @@ def detect_header_row(sdf):
         vals=[str(v).lower().strip() for v in row.values if pd.notna(v)]
         if sum(1 for v in vals for k in kws if k in v)>=2: return i
     return 0
+
+def build_known_classes_from_gvcn(df, col_gvcn) -> set:
+    """
+    Thu thập danh sách lớp chuẩn từ cột GVCN, xử lý mọi dạng viết:
+      '7A'        → {7A}
+      '7ABCD'     → {7A,7B,7C,7D}   compact alpha liên tiếp
+      '7A,B,C,D'  → {7A,7B,7C,7D}   alpha suffix sau dấy phẩy
+      '10A1'      → {10A1}           lớp có số, giữ nguyên
+      '11A12'     → {11A12}          giữ nguyên
+    Trả về set rỗng nếu col_gvcn không tồn tại hoặc toàn bộ ô trống.
+    """
+    known: set = set()
+    if not col_gvcn:
+        return known
+    _GP = r'(?:0?[1-9]|1[0-2])'
+    _TOK = re.compile(
+        r'(?P<full>'   + _GP + r'[A-Za-zÀ-ỹ]+\d+)'
+        r'|(?P<base>'  + _GP + r'[A-Za-zÀ-ỹ]{2,}(?!\d))'
+        r'|(?P<single>'+ _GP + r'[A-Za-zÀ-ỹ](?![A-Za-zÀ-ỹ\d]))'
+        r'|(?P<alpha>[A-Za-zÀ-ỹ](?![A-Za-zÀ-ỹ\d]))'
+        r'|(?P<sep>[,;\s]+)'
+        r'|(?P<other>.)',
+        re.UNICODE
+    )
+    for raw_val in df[col_gvcn]:
+        val = str(raw_val).strip() if pd.notna(raw_val) else ''
+        if not val or val.lower() in ('nan', 'none', ''):
+            continue
+        cur_base = None
+        for m in _TOK.finditer(val):
+            kind, v = m.lastgroup, m.group().strip()
+            if not v or kind == 'sep':
+                continue
+            elif kind == 'full':
+                # Lớp đầy đủ có số: 10A1, 11A12 → thêm trực tiếp
+                known.add(v)
+                cur_base = None
+            elif kind == 'base':
+                # Compact alpha: 7ABCD, 7AB → tách từng chữ cái
+                grade = re.match(r'(0?[1-9]|1[0-2])', v).group(1)
+                for ch in v[len(grade):]:
+                    known.add(f"{grade}{ch}")
+                cur_base = grade
+            elif kind == 'single':
+                # Lớp 1 chữ: 7A, 9B → thêm và set làm base
+                known.add(v)
+                cur_base = re.match(r'(0?[1-9]|1[0-2])', v).group(1)
+            elif kind == 'alpha':
+                # Chữ suffix: "7A,B,C" → B,C là suffix của 7
+                if cur_base:
+                    known.add(f"{cur_base}{v}")
+            else:
+                cur_base = None
+    return known
+
 
 def get_grade(cls):
     """Trả về số khối (int) từ tên lớp. Hỗ trợ khối 1-12 và dạng 01A, 09B."""
@@ -858,6 +891,23 @@ def process_data(input_src, nien_khoa: str, cap_hoc: str = "AUTO",
             return get_subject_code_for_class(sr, lop)
         return get_subject_code(sr, cap_hoc)
 
+    def _resolve_code_no_class(sr: str) -> str | None:
+        """
+        Tra mã môn khi PCCM nhắc tới môn nhưng KHÔNG kèm lớp cụ thể.
+        Không biết khối lớp nên không dùng được get_subject_code_for_class;
+        thử lần lượt các bảng môn (THPT -> THCS -> TH) ở chế độ AUTO.
+        """
+        rs_key = sr.lower().strip() if sr else ""
+        if resolved_subjects and rs_key in resolved_subjects:
+            return resolved_subjects[rs_key]
+        if cap_hoc != "AUTO":
+            return get_subject_code(sr, cap_hoc)
+        for lvl in ("THPT", "THCS", "TH"):
+            code = get_subject_code(sr, lvl)
+            if code:
+                return code
+        return None
+
     src = (io.BytesIO(input_src) if isinstance(input_src,(bytes,bytearray))
            else input_src)
 
@@ -882,59 +932,18 @@ def process_data(input_src, nien_khoa: str, cap_hoc: str = "AUTO",
     df = df[df[col_hoten].notna()&(df[col_hoten].astype(str).str.strip()!="")].copy()
     df = df.reset_index(drop=True)
 
-    # ── Bước 1: Thu thập known_classes từ toàn bộ cột GVCN (2 lượt) ──────────
-    # Lượt 1: Chỉ bắt các lớp "nguyên tử" — chữ đơn hoặc chữ + số (10A1, 7A, 9B2)
-    #         KHÔNG bắt dạng compact chữ cái liên tiếp (7ABCD, 8AB) để tránh nhầm
-    # Lượt 2: Dùng known_pass1 để tách dạng compact: "7ABCD" → [7A,7B,7C,7D]
+    # ── Bước 1: Thu thập known_classes từ cột GVCN ───────────────────────────
+    # build_known_classes_from_gvcn xử lý mọi dạng viết:
+    #   7A, 7ABCD → {7A…7D},  7A,B,C,D → {7A…7D},  10A1 → {10A1}
+    # Khi cột GVCN trống → set rỗng, parse_pccm chạy theo logic mặc định.
     known_classes: set = set()
     if col_gvcn:
-        log("Đọc danh sách lớp từ cột GVCN (lượt 1 – chữ đơn hoặc chữ+số)...")
-        # Lượt 1: chỉ bắt lớp có 1 chữ cái + số tùy ý, hoặc 1 chữ cái không có số
-        # Regex: khối + MỘT chữ cái + số tùy ý → lớp nguyên tử (7A, 10A1, 9B12…)
-        #        khối + NHIỀU chữ cái + số → cũng bắt nhưng chỉ khi có số theo sau
-        #                                     (10A1, 10AB1 — không phải 7ABCD)
-        _atomic_pat = re.compile(
-            r'(?:0?[1-9]|1[0-2])'    # khối
-            r'(?:'
-                r'[A-Za-zÀ-ỹ]\d+'   # 1 chữ cái + ít nhất 1 số: 7A1, 10A12
-                r'|[A-Za-zÀ-ỹ](?![A-Za-zÀ-ỹ])'  # 1 chữ cái không theo sau bởi chữ: 7A
-                r'|[A-Za-zÀ-ỹ]{2,}\d+'  # nhiều chữ + số: 10AB1 (nếu có dạng này)
-            r')',
-            re.UNICODE
-        )
-        known_pass1: set = set()
-        # Pattern bắt compact alpha liền (7ABCD) để tách thành atoms
-        _compact_alpha_scan = re.compile(
-            r'(?<![A-Za-z\d])(0?[1-9]|1[0-2])([A-Za-zÀ-ỹ]{2,})(?!\d)', re.UNICODE)
-        for val in df[col_gvcn]:
-            if pd.notna(val) and str(val).strip():
-                # Tiền xử lý 7A,B,C,D → 7A,7B,7C,7D trước khi bắt lớp nguyên tử
-                val_pre = _preprocess_alpha_suffixes(str(val).strip())
-                for c in _atomic_pat.findall(val_pre):
-                    known_pass1.add(c.strip())
-                # Bắt thêm compact alpha liền (7ABCD → 7A,7B,7C,7D)
-                for m in _compact_alpha_scan.finditer(str(val).strip()):
-                    grade, alphas = m.group(1), m.group(2)
-                    for ch in alphas:
-                        known_pass1.add(f"{grade}{ch}")
-        log(f"  → Lượt 1: {len(known_pass1)} lớp nguyên tử: {', '.join(sorted(known_pass1))}")
-
-        # Lượt 2: expand_class_range với known_pass1 để tách compact alpha "7ABCD" → 7A,7B,7C,7D
-        log("Đọc danh sách lớp từ cột GVCN (lượt 2 – tách compact chữ cái)...")
-        for val in df[col_gvcn]:
-            if pd.notna(val) and str(val).strip():
-                # _preprocess_alpha_suffixes đã được gọi bên trong expand_class_range
-                expanded = expand_class_range(str(val).strip(), known_pass1 if known_pass1 else None)
-                for c in expanded:
-                    known_classes.add(c.strip())
-                # Giữ lại các lớp từ pass1 (phòng expand bỏ sót)
-                for c in known_pass1:
-                    known_classes.add(c)
-
-        if not known_classes:
-            known_classes = known_pass1
-
-        log(f"  → Tổng cộng {len(known_classes)} lớp: {', '.join(sorted(known_classes))}")
+        log("Đọc danh sách lớp từ cột GVCN...")
+        known_classes = build_known_classes_from_gvcn(df, col_gvcn)
+        if known_classes:
+            log(f"  → {len(known_classes)} lớp: {', '.join(sorted(known_classes))}")
+        else:
+            log("  → Cột GVCN trống, xử lý PCCM theo logic mặc định.")
 
     total = len(df)
     teachers = []
@@ -967,6 +976,7 @@ def process_data(input_src, nien_khoa: str, cap_hoc: str = "AUTO",
         # Tiểu học AUTO/TH: GVCN tự động dạy các môn chính khóa của lớp chủ nhiệm.
         # Khối được xác định từ lớp CN thực tế (không phụ thuộc cap_hoc truyền vào).
         mllist: list = []
+        extra_codes: list = []   # Mã môn từ PCCM không kèm lớp (VD: "... + Tin học")
 
         cn_grade = get_grade(cn_classes[0]) if cn_classes else None
         is_th_gvcn = (cn_grade is not None and 1 <= cn_grade <= 5 and
@@ -984,6 +994,13 @@ def process_data(input_src, nien_khoa: str, cap_hoc: str = "AUTO",
         parsed = parse_pccm(praw, known_classes if known_classes else None,
                              resolved_ambiguities or {})
         for sr, ll in parsed:
+            if not ll:
+                # Môn có tên trong PCCM nhưng không kèm lớp -> vẫn thêm mã môn vào Môn dạy
+                if sr:
+                    code = _resolve_code_no_class(sr)
+                    if code and code not in extra_codes:
+                        extra_codes.append(code)
+                continue
             for lop in ll:
                 lop = lop.strip()
                 if not lop: continue
@@ -1003,6 +1020,9 @@ def process_data(input_src, nien_khoa: str, cap_hoc: str = "AUTO",
         scodes = []
         for _, code in uml:
             if code and code != "?" and code not in scodes:
+                scodes.append(code)
+        for code in extra_codes:
+            if code not in scodes:
                 scodes.append(code)
 
         teachers.append({"stt":stt,"ho_ten":hoten,"ngay_dt":ndt,"ngay_str":nstr,
