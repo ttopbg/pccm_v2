@@ -9,7 +9,7 @@ from teacher_core import (process_data, detect_header_row, find_column,
                            detect_ambiguous_in_data, detect_unknown_subjects,
                            _ALL_CODES)
 
-NIEN_KHOA_OPTIONS = ["2027-2028", "2025-2026"]
+NIEN_KHOA_OPTIONS = ["2026-2027", "2027-2028"]
 
 st.set_page_config(page_title="PCCM", page_icon="🔅", layout="wide")
 
