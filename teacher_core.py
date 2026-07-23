@@ -356,6 +356,17 @@ def expand_class_range(text, known_classes=None, resolved_ambiguities=None):
             classes.append(f"{g}{a}{i}")
     text = rp.sub('', text)
 
+    # ── Range rút gọn (không lặp khối bên phải): 10A1-A8 → 10A1..10A8 ──────
+    # Vế phải chỉ cần cùng chữ (A) với vế trái, không cần lặp lại số khối (10)
+    rp2 = re.compile(
+        r'(0?[1-9]|1[0-2])([A-Za-zÀ-ỹ]+)(\d+)\s*(?:đến|den|-)\s*\2(\d+)(?![A-Za-zÀ-ỹ\d])',
+        re.UNICODE)
+    for m in rp2.finditer(text):
+        g, a, s, e = m.groups()
+        for i in range(int(s), int(e)+1):
+            classes.append(f"{g}{a}{i}")
+    text = rp2.sub('', text)
+
     def _split_digits(grade, alpha, digits):
         raw_token = f"{grade}{alpha}{digits}"
         if raw_token in resolved_ambiguities:
@@ -602,7 +613,7 @@ def _expand_suffix_groups_in_text(text):
       '11A3, 12D'        → '11A3, 12D'  (12D = lớp riêng)
     """
     # ── Bước 0: alpha suffix "7A,B,C,D" → "7A,7B,7C,7D" ────────────────────
-    _GP0 = r'(?:0?[1-9]|1[0-2])'
+    _GP0 = r'(?:1[0-2]|0?[1-9])'
     def _alpha_sfx(m):
         base_cls = m.group(1)
         grade    = re.match(r'(' + _GP0 + r')', base_cls).group(1)
@@ -612,6 +623,19 @@ def _expand_suffix_groups_in_text(text):
         r'(' + _GP0 + r'[A-Za-zÀ-ỹ]+(?!\d))'
         r'((?:\s*[,;]\s*[A-Za-zÀ-ỹ](?![A-Za-zÀ-ỹ\d]))+)',
         _alpha_sfx, text, flags=re.UNICODE
+    )
+    # ── Bước 0b: chữ+số suffix "10A2,A7,A8" → "10A2,10A7,10A8" ─────────────
+    # Tái sử dụng KHỐI (số) của lớp gốc; phần chữ+số kế tiếp không lặp lại khối.
+    # Khác Bước 0 ở chỗ suffix ở đây có kèm số (A7, A8), không phải chữ đơn lẻ.
+    def _alpha_digit_sfx(m):
+        base_cls = m.group(1)
+        grade    = re.match(r'(' + _GP0 + r')', base_cls).group(1)
+        extras   = re.findall(r'[A-Za-zÀ-ỹ]+\d+', m.group(2))
+        return ','.join([base_cls] + [f"{grade}{e}" for e in extras])
+    text = re.sub(
+        r'(' + _GP0 + r'[A-Za-zÀ-ỹ]+\d+)'
+        r'((?:\s*[,;]\s*[A-Za-zÀ-ỹ]+\d+)+)(?![A-Za-zÀ-ỹ\d])',
+        _alpha_digit_sfx, text, flags=re.UNICODE
     )
     _GP = r'(?:0?[1-9]|1[0-2])'
     # Tokenizer phân biệt 3 loại: lớp có số cuối, lớp không có số, số thuần
@@ -691,12 +715,15 @@ def parse_pccm(raw_pccm, known_classes=None, resolved_ambiguities=None):
     text = _expand_suffix_groups_in_text(text)
     # CRP: class-range pattern — hỗ trợ khối 1-12
     _GP = r'(?:0?[1-9]|1[0-2])'   # grade prefix (local)
-    CRP = (r''+_GP+r'[A-Za-zÀ-ỹ]+\d+\s*(?:đến|den|-)\s*'+_GP+r'[A-Za-zÀ-ỹ]+\d+'   # range
+    CRP = (r''+_GP+r'[A-Za-zÀ-ỹ]+\d+\s*(?:đến|den|-)\s*'+_GP+r'[A-Za-zÀ-ỹ]+\d+'   # range đầy đủ: 10A1-10A5
+           r'|'+_GP+r'[A-Za-zÀ-ỹ]+\d+\s*(?:đến|den|-)\s*[A-Za-zÀ-ỹ]+\d+(?![A-Za-zÀ-ỹ\d])'  # range rút gọn: 10A1-A8
            r'|(?<!\d)'+_GP+r'[A-Za-zÀ-ỹ]+\d{3,}'                                    # compact 3+
            r'|'+_CLASS_PAT)                                                            # normal
     tokens,results = [],[]
+    # Cho phép dấu gạch nối '-' trong tên môn ghép (VD: "GDQP-AN") để không bị
+    # tách vụn thành các từ rời rạc và mất tên môn.
     tr = re.compile(r'(?P<class>'+CRP+r')|(?P<sep>[+,\s]+)|(?P<colon>:)'
-                    r'|(?P<word>[A-Za-zÀ-ỹĐđ][A-Za-zÀ-ỹĐđ\(\)]*)|(?P<other>.)',re.UNICODE)
+                    r'|(?P<word>[A-Za-zÀ-ỹĐđ][A-Za-zÀ-ỹĐđ\(\)\-]*)|(?P<other>.)',re.UNICODE)
     for m in tr.finditer(text): tokens.append((m.lastgroup, m.group().strip()))
     merged,i = [],0
     while i < len(tokens):
@@ -825,14 +852,14 @@ def build_known_classes_from_gvcn(df, col_gvcn) -> set:
                 cur_base = None
             elif kind == 'base':
                 # Compact alpha: 7ABCD, 7AB → tách từng chữ cái
-                grade = re.match(r'(0?[1-9]|1[0-2])', v).group(1)
+                grade = re.match(r'(1[0-2]|0?[1-9])', v).group(1)
                 for ch in v[len(grade):]:
                     known.add(f"{grade}{ch}")
                 cur_base = grade
             elif kind == 'single':
                 # Lớp 1 chữ: 7A, 9B → thêm và set làm base
                 known.add(v)
-                cur_base = re.match(r'(0?[1-9]|1[0-2])', v).group(1)
+                cur_base = re.match(r'(1[0-2]|0?[1-9])', v).group(1)
             elif kind == 'alpha':
                 # Chữ suffix: "7A,B,C" → B,C là suffix của 7
                 if cur_base:
