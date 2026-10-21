@@ -241,7 +241,13 @@ def get_subject_code_for_class(raw: str, class_name: str) -> str:
     return get_subject_code(raw, cap)
 
 _GRADE_PFX  = r'(?:0?[1-9]|1[0-2])'
-_CLASS_PAT  = r'(?<!\d)' + _GRADE_PFX + r'[A-Za-zÀ-ỹ]+\.?\d{0,3}(?:\.\d+)?'
+# Phần "đuôi" của tên lớp: chữ cái (9A, 10A1) HOẶC dấu gạch chéo (8/4, 9/11).
+# Dấu '/' được coi như một "chữ cái" đặc biệt để tái dùng toàn bộ logic suffix/range.
+_ALPHA_PART = r'(?:[A-Za-zÀ-ỹ]+|/)'
+# Lớp dạng gạch chéo: 8/4, 9/11, 10/1 (số khối + '/' + 1-2 chữ số)
+_SLASH_CLASS = r'(?<!\d)' + _GRADE_PFX + r'/\d{1,2}(?!\d)'
+_CLASS_PAT  = (r'(?<!\d)' + _GRADE_PFX + r'[A-Za-zÀ-ỹ]+\.?\d{0,3}(?:\.\d+)?'
+               r'|' + _SLASH_CLASS)
 _SUBJECT_STOPWORDS = {
     "đến","den","và","va","từ","tu","lớp","lop",
     "khối","khoi","tới","toi","to","the","from"
@@ -311,6 +317,7 @@ def expand_class_range(text, known_classes=None, resolved_ambiguities=None):
     """
     Parse chuỗi lớp học thành danh sách lớp.
     Hỗ trợ khối 1-12 (bao gồm dạng viết tắt 1A, 6B, 9C và dạng 01A…).
+    Hỗ trợ dạng gạch chéo: '8/4', '9/11', '8/1,2,3', '8/1-8/5', '8/1-5'.
     Hỗ trợ dạng compact chữ cái: '7ABCD' → ['7A','7B','7C','7D'] khi known_classes có sẵn.
     known_classes: tập hợp tên lớp hợp lệ (từ cột GVCN).
     resolved_ambiguities: dict {raw_token: [lớp đã chọn]} — lựa chọn của người dùng.
@@ -319,7 +326,8 @@ def expand_class_range(text, known_classes=None, resolved_ambiguities=None):
         resolved_ambiguities = {}
 
     # Bỏ sĩ số trong ngoặc: 10A1(52) → 10A1
-    text = re.sub(r'((?:0?[1-9]|1[0-2])[A-Za-zÀ-ỹ]+\d*)\(\d+\)', r'\1', text, flags=re.UNICODE)
+    # Hỗ trợ cả dạng gạch chéo: 8/4(38) → 8/4
+    text = re.sub(r'((?:0?[1-9]|1[0-2])(?:[A-Za-zÀ-ỹ]+\d*|/\d+))\(\d+\)', r'\1', text, flags=re.UNICODE)
 
     # Mở rộng suffix (số + chữ): 7A,B,C,D → 7A,7B,7C,7D / 11A4,5 → 11A4,11A5
     text = _expand_suffix_groups_in_text(text)
@@ -346,9 +354,10 @@ def expand_class_range(text, known_classes=None, resolved_ambiguities=None):
         return m.group()
     text = _alpha_compact_pat.sub(_expand_alpha, text)
 
-    # ── Xử lý range: 1A1-1A5, 9B1 đến 9B3, 10A1-10A5 ──────────────────────
+    # ── Xử lý range: 1A1-1A5, 9B1 đến 9B3, 10A1-10A5, 8/1-8/5 ───────────────
+    # Group 2 chấp nhận chữ cái hoặc '/', nên "8/1-8/5" cũng được hiểu là range.
     rp = re.compile(
-        r'(0?[1-9]|1[0-2])([A-Za-zÀ-ỹ]+)(\d+)\s*(?:đến|den|-)\s*\1\2(\d+)',
+        r'(0?[1-9]|1[0-2])([A-Za-zÀ-ỹ]+|/)(\d+)\s*(?:đến|den|-)\s*\1\2(\d+)',
         re.UNICODE)
     for m in rp.finditer(text):
         g, a, s, e = m.groups()
@@ -366,6 +375,18 @@ def expand_class_range(text, known_classes=None, resolved_ambiguities=None):
         for i in range(int(s), int(e)+1):
             classes.append(f"{g}{a}{i}")
     text = rp2.sub('', text)
+
+    # ── Range rút gọn dạng gạch chéo: 8/1-5 → 8/1..8/5 ─────────────────────
+    # Vế phải chỉ là số thuần (không có '/'), không được dính tiếp chữ/số/'/'
+    # để không nhầm với "8/1-9/2" (hai lớp khác khối) hay "9/2-10A1".
+    rp3 = re.compile(
+        r'(0?[1-9]|1[0-2])/(\d+)\s*(?:đến|den|-)\s*(\d+)(?![A-Za-zÀ-ỹ\d/])',
+        re.UNICODE)
+    for m in rp3.finditer(text):
+        g, s, e = m.groups()
+        for i in range(int(s), int(e)+1):
+            classes.append(f"{g}/{i}")
+    text = rp3.sub('', text)
 
     def _split_digits(grade, alpha, digits):
         raw_token = f"{grade}{alpha}{digits}"
@@ -424,7 +445,7 @@ def expand_class_range(text, known_classes=None, resolved_ambiguities=None):
     # ── Xử lý suffix groups: 11A4,5,11,12A6,7 → 11A4,11A5,11A11,12A6,12A7 ──
     # Tokenize thành các nhóm (base, [suffixes]) rồi sinh lớp
     _SUFFIX_TOK = re.compile(
-        r'(?P<cls_full>(?:0?[1-9]|1[0-2])[A-Za-zÀ-ỹ]+\d+)'   # lớp đầy đủ: 11A4
+        r'(?P<cls_full>(?:0?[1-9]|1[0-2])' + _ALPHA_PART + r'\d+)'   # lớp đầy đủ: 11A4, 8/4
         r'|(?P<cls_pfx>(?:0?[1-9]|1[0-2])[A-Za-zÀ-ỹ]+)'       # prefix: 11A
         r'|(?P<num>\d+)'                                          # số suffix: 5, 11
         r'|(?P<sep>[,;\s]+)'                                      # dấu phân cách
@@ -443,7 +464,7 @@ def expand_class_range(text, known_classes=None, resolved_ambiguities=None):
             if not val or kind in ('sep', 'other'): continue
             if kind == 'cls_full':
                 if cur_base and cur_nums: groups.append((cur_base, cur_nums))
-                bm = re.match(r'((?:0?[1-9]|1[0-2])[A-Za-zÀ-ỹ]+)(\d+)$', val, re.UNICODE)
+                bm = re.match(r'((?:0?[1-9]|1[0-2])' + _ALPHA_PART + r')(\d+)$', val, re.UNICODE)
                 cur_base, cur_nums = (bm.group(1), [bm.group(2)]) if bm else (val, [])
             elif kind == 'cls_pfx':
                 if cur_base and cur_nums: groups.append((cur_base, cur_nums))
@@ -457,9 +478,9 @@ def expand_class_range(text, known_classes=None, resolved_ambiguities=None):
     # Bắt cụm: lớp đầy đủ + (phẩy + số-hoặc-lớp) lặp lại ≥1 lần
     # CLASS alternation đứng trước \d+ để tránh nhầm grade prefix là suffix digit
     _SFX_SEG = re.compile(
-        r'(?:0?[1-9]|1[0-2])[A-Za-zÀ-ỹ]+\d+'
+        r'(?:0?[1-9]|1[0-2])' + _ALPHA_PART + r'\d+'
         r'(?:\s*[,;]\s*'
-        r'(?:(?:0?[1-9]|1[0-2])[A-Za-zÀ-ỹ]+\d+|\d+)'
+        r'(?:(?:0?[1-9]|1[0-2])' + _ALPHA_PART + r'\d+|\d+)'
         r')+',
         re.UNICODE
     )
@@ -640,7 +661,7 @@ def _expand_suffix_groups_in_text(text):
     _GP = r'(?:0?[1-9]|1[0-2])'
     # Tokenizer phân biệt 3 loại: lớp có số cuối, lớp không có số, số thuần
     _TOK = re.compile(
-        r'(?P<cls_full>(?:' + _GP + r')[A-Za-zÀ-ỹ]+\d+)'       # lớp có số: 11A3, 12A6
+        r'(?P<cls_full>(?:' + _GP + r')' + _ALPHA_PART + r'\d+)'  # lớp có số: 11A3, 12A6, 8/4
         r'|(?P<cls_nodig>(?:' + _GP + r')[A-Za-zÀ-ỹ]+(?!\d))'   # lớp không số: 12D, 11D
         r'|(?P<num>\d+)'                                           # số suffix: 5, 11
         r'|(?P<sep>[,;\s]+)'
@@ -656,7 +677,7 @@ def _expand_suffix_groups_in_text(text):
         kind, val, ts, te = tokens[j]
         if kind != 'cls_full':
             j += 1; continue
-        bm = re.match(r'((?:' + _GP + r')[A-Za-zÀ-ỹ]+)(\d+)$', val, re.UNICODE)
+        bm = re.match(r'((?:' + _GP + r')' + _ALPHA_PART + r')(\d+)$', val, re.UNICODE)
         if not bm:
             j += 1; continue
 
@@ -671,7 +692,7 @@ def _expand_suffix_groups_in_text(text):
             if k2 == 'num':
                 parts.append(v2); run_end = te2; k += 1
             elif k2 == 'cls_full':
-                bm2 = re.match(r'((?:' + _GP + r')[A-Za-zÀ-ỹ]+)(\d+)$', v2, re.UNICODE)
+                bm2 = re.match(r'((?:' + _GP + r')' + _ALPHA_PART + r')(\d+)$', v2, re.UNICODE)
                 if bm2 and bm2.group(1) != base:
                     # Lớp mới khác base → flush nhóm cũ, bắt đầu nhóm mới
                     if len(parts) > 1:
@@ -718,7 +739,9 @@ def parse_pccm(raw_pccm, known_classes=None, resolved_ambiguities=None):
     CRP = (r''+_GP+r'[A-Za-zÀ-ỹ]+\d+\s*(?:đến|den|-)\s*'+_GP+r'[A-Za-zÀ-ỹ]+\d+'   # range đầy đủ: 10A1-10A5
            r'|'+_GP+r'[A-Za-zÀ-ỹ]+\d+\s*(?:đến|den|-)\s*[A-Za-zÀ-ỹ]+\d+(?![A-Za-zÀ-ỹ\d])'  # range rút gọn: 10A1-A8
            r'|(?<!\d)'+_GP+r'[A-Za-zÀ-ỹ]+\d{3,}'                                    # compact 3+
-           r'|'+_CLASS_PAT)                                                            # normal
+           r'|(?<!\d)'+_GP+r'/\d+\s*(?:đến|den|-)\s*'+_GP+r'/\d+'                       # range gạch chéo: 8/1-8/5
+           r'|(?<!\d)'+_GP+r'/\d+\s*(?:đến|den|-)\s*\d+(?![A-Za-zÀ-ỹ\d/])'           # range gạch chéo rút gọn: 8/1-5
+           r'|'+_CLASS_PAT)                                                            # normal (gồm cả 8/4, 9/11)
     tokens,results = [],[]
     # Cho phép dấu gạch nối '-' trong tên môn ghép (VD: "GDQP-AN") để không bị
     # tách vụn thành các từ rời rạc và mất tên môn.
@@ -829,7 +852,8 @@ def build_known_classes_from_gvcn(df, col_gvcn) -> set:
         return known
     _GP = r'(?:0?[1-9]|1[0-2])'
     _TOK = re.compile(
-        r'(?P<full>'   + _GP + r'[A-Za-zÀ-ỹ]+\d+)'
+        r'(?P<slash>'  + _GP + r'/\d{1,2}(?!\d))'          # lớp gạch chéo: 8/4, 9/11
+        r'|(?P<full>'  + _GP + r'[A-Za-zÀ-ỹ]+\d+)'
         r'|(?P<base>'  + _GP + r'[A-Za-zÀ-ỹ]{2,}(?!\d))'
         r'|(?P<single>'+ _GP + r'[A-Za-zÀ-ỹ](?![A-Za-zÀ-ỹ\d]))'
         r'|(?P<alpha>[A-Za-zÀ-ỹ](?![A-Za-zÀ-ỹ\d]))'
@@ -846,8 +870,8 @@ def build_known_classes_from_gvcn(df, col_gvcn) -> set:
             kind, v = m.lastgroup, m.group().strip()
             if not v or kind == 'sep':
                 continue
-            elif kind == 'full':
-                # Lớp đầy đủ có số: 10A1, 11A12 → thêm trực tiếp
+            elif kind in ('full', 'slash'):
+                # Lớp đầy đủ có số: 10A1, 11A12, 8/4 → thêm trực tiếp
                 known.add(v)
                 cur_base = None
             elif kind == 'base':
@@ -870,8 +894,8 @@ def build_known_classes_from_gvcn(df, col_gvcn) -> set:
 
 
 def get_grade(cls):
-    """Trả về số khối (int) từ tên lớp. Hỗ trợ khối 1-12 và dạng 01A, 09B."""
-    m = re.match(r'^(0?[1-9]|1[0-2])(?=[A-Za-zÀ-ỹ])', str(cls).strip(), re.UNICODE)
+    """Trả về số khối (int) từ tên lớp. Hỗ trợ khối 1-12, dạng 01A, 09B và dạng gạch chéo 8/4, 9/11."""
+    m = re.match(r'^(0?[1-9]|1[0-2])(?=[A-Za-zÀ-ỹ/])', str(cls).strip(), re.UNICODE)
     return int(m.group(1)) if m else None
 
 def _sh(ws,row,ncols,color="1F4E79"):
